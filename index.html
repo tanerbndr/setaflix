@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/taner/Downloads/index_1.html -->
+<!-- saved from url=(0045)file:///C:/Users/taner/Downloads/index_2.html -->
 <html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -7,11 +7,15 @@
 <meta name="theme-color" content="#0d0d14">
 <title>SeTaFlix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
 <link href="./index_files/css2" rel="stylesheet">
 
-<!-- Firebase SDK -->
-<script src="./index_files/firebase-app-compat.min.js.indir"></script>
-<script src="./index_files/firebase-database-compat.min.js.indir"></script>
+<!-- Firebase SDK (CDN) -->
+<script src="./index_files/firebase-app-compat.js.indir"></script>
+<script src="./index_files/firebase-database-compat.js.indir"></script>
+
+<!-- HLS.js — m3u8 desteği için -->
+<script src="./index_files/hls.js@1.5.7"></script>
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -455,7 +459,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 
   <div class="feats">
     <div class="feat"><div class="fdot"></div>YouTube</div>
-    <div class="feat"><div class="fdot"></div>Direkt URL / MP4</div>
+    <div class="feat"><div class="fdot"></div>m3u8 / MP4</div>
     <div class="feat"><div class="fdot"></div>Gerçek zamanlı sync</div>
     <div class="feat"><div class="fdot"></div>Sohbet</div>
     <div class="feat"><div class="fdot"></div>Telefon uyumlu</div>
@@ -488,7 +492,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
           <div class="vph" id="vph">
             <div class="vph-icon">▶</div>
             <p>Video bekleniyor</p>
-            <small>Aşağıdan YouTube veya direkt URL ekle</small>
+            <small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small>
           </div>
         </div>
       </div>
@@ -501,7 +505,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
       <div class="vctl">
         <div class="srctabs">
           <button class="stab on" id="t-yt" onclick="srcMode(&#39;youtube&#39;)">YouTube</button>
-          <button class="stab" id="t-url" onclick="srcMode(&#39;url&#39;)">URL</button>
+          <button class="stab" id="t-url" onclick="srcMode(&#39;url&#39;)">URL / m3u8</button>
         </div>
         <div class="vinrow">
           <input id="vurl" placeholder="YouTube linki veya video URL&#39;si...">
@@ -558,7 +562,8 @@ const S = {
   user: '', room: '', isHost: false,
   mode: 'youtube', members: {}, fbReady: false,
   myId: 'u_' + Math.random().toString(36).substr(2,8),
-  db: null
+  db: null,
+  hls: null  // HLS.js instance
 };
 
 const COLORS = ['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
@@ -614,7 +619,6 @@ function skipFirebase(){
 }
 
 // Auto-init with built-in config on page load
-// Retry mechanism in case SDK loads slowly
 function tryInitFirebase(attempts){
   if(typeof firebase !== 'undefined' && firebase.initializeApp){
     initFirebase(SETAFLIX_CONFIG);
@@ -776,14 +780,14 @@ function showSyncBar(txt){
 }
 
 // ══════════════════════════════════════
-//  VIDEO
+//  VIDEO — YouTube + m3u8 + mp4
 // ══════════════════════════════════════
 function srcMode(m){
   S.mode = m;
   document.getElementById('t-yt').classList.toggle('on', m==='youtube');
   document.getElementById('t-url').classList.toggle('on', m==='url');
   document.getElementById('vurl').placeholder =
-    m==='youtube' ? 'YouTube linki veya video ID...' : 'Direkt video URL (mp4, m3u8...)';
+    m==='youtube' ? 'YouTube linki veya video ID...' : 'm3u8 veya mp4 linki yapıştır...';
 }
 
 function loadVideo(){
@@ -792,29 +796,101 @@ function loadVideo(){
   loadVideoUrl(raw, S.mode, true);
 }
 
+function destroyHls(){
+  if(S.hls){
+    S.hls.destroy();
+    S.hls = null;
+  }
+}
+
+function isM3u8(url){
+  return url.includes('.m3u8') || url.includes('m3u8');
+}
+
 function loadVideoUrl(raw, mode, broadcast){
   const cont = document.getElementById('vcont');
 
+  // Önceki HLS instance'ı temizle
+  destroyHls();
+
+  // ─── YouTube ───
   if(mode==='youtube' || raw.includes('youtube.com') || raw.includes('youtu.be')){
     const vid = ytId(raw);
     if(!vid){ toast('Geçerli YouTube linki gir'); return; }
-    // origin parametresi Vercel domain'ini otomatik alacak
     const origin = window.location.origin;
     cont.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&origin=${encodeURIComponent(origin)}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>`;
     if(broadcast){
       fbSync({ cmd:'load', url:raw, type:'youtube', name: S.user });
       fbChat(S.user + ' bir YouTube videosu başlattı.', true);
-      toast('Video yüklendi!');
+      toast('YouTube video yüklendi!');
     }
-  } else {
-    cont.innerHTML = `<video src="${esc(raw)}" controls autoplay playsinline style="background:#000"
-      onplay="onVPlay()" onpause="onVPause()" onseeked="onVSeek(this)"
-      onerror="this.outerHTML='<div class=vph style=height:100%;padding:2rem><div class=vph-icon>✕</div><p>Video yüklenemedi</p><small>URL geçersiz veya CORS engeli olabilir. F12 ile m3u8/mp4 linki dene.</small></div>'"></video>`;
+    return;
+  }
+
+  // ─── m3u8 (HLS) ───
+  if(isM3u8(raw)){
+    cont.innerHTML = `<video id="hlsvid" controls autoplay playsinline style="background:#000;width:100%;height:100%"
+      onplay="onVPlay()" onpause="onVPause()" onseeked="onVSeek(this)"></video>`;
+    const video = document.getElementById('hlsvid');
+
+    if(Hls.isSupported()){
+      const hls = new Hls({
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        enableWorker: true,
+        lowLatencyMode: false
+      });
+      hls.loadSource(raw);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function(){
+        video.play().catch(()=>{});
+      });
+      hls.on(Hls.Events.ERROR, function(event, data){
+        if(data.fatal){
+          console.error('HLS fatal error:', data);
+          if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+            toast('m3u8 ağ hatası — link geçersiz veya CORS engeli olabilir');
+            hls.startLoad();
+          } else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+            toast('Medya hatası — kurtarma deneniyor...');
+            hls.recoverMediaError();
+          } else {
+            toast('Video yüklenemedi — farklı bir link dene');
+            hls.destroy();
+          }
+        }
+      });
+      S.hls = hls;
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      // Safari doğal HLS desteği
+      video.src = raw;
+      video.addEventListener('loadedmetadata', ()=> video.play().catch(()=>{}));
+    } else {
+      cont.innerHTML = `<div class="vph" style="height:100%;padding:2rem">
+        <div class="vph-icon">✕</div>
+        <p>Bu tarayıcı m3u8 desteklemiyor</p>
+        <small>Chrome, Firefox veya Safari dene</small>
+      </div>`;
+      toast('m3u8 desteklenmiyor');
+      return;
+    }
+
     if(broadcast){
       fbSync({ cmd:'load', url:raw, type:'url', name: S.user });
-      fbChat(S.user + ' bir video başlattı.', true);
-      toast('Video yüklendi!');
+      fbChat(S.user + ' bir dizi/film başlattı.', true);
+      toast('m3u8 video yüklendi!');
     }
+    return;
+  }
+
+  // ─── Direkt mp4/video ───
+  cont.innerHTML = `<video src="${esc(raw)}" controls autoplay playsinline style="background:#000;width:100%;height:100%"
+    onplay="onVPlay()" onpause="onVPause()" onseeked="onVSeek(this)"
+    onerror="this.outerHTML='<div class=vph style=height:100%;padding:2rem><div class=vph-icon>✕</div><p>Video yüklenemedi</p><small>URL geçersiz veya CORS engeli olabilir</small></div>'"></video>`;
+  if(broadcast){
+    fbSync({ cmd:'load', url:raw, type:'url', name: S.user });
+    fbChat(S.user + ' bir video başlattı.', true);
+    toast('Video yüklendi!');
   }
 }
 
@@ -926,12 +1002,13 @@ function renderMembers(){
 //  ROOM CONTROLS
 // ══════════════════════════════════════
 function leaveRoom(){
+  destroyHls();
   if(S.fbReady && S.db){
     S.db.ref('rooms/' + S.room + '/members/' + S.myId).remove();
   }
   hide('room');
   show('lobby');
-  document.getElementById('vcont').innerHTML=`<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube veya direkt URL ekle</small></div>`;
+  document.getElementById('vcont').innerHTML=`<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>`;
   document.getElementById('msgs').innerHTML='';
   S.members={};
   document.getElementById('mob-tog').style.display='none';
@@ -984,6 +1061,7 @@ document.addEventListener('keydown', e=>{
   }
 });
 </script>
+
 
 
 </body></html>
