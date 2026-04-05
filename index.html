@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0043)file:///C:/Users/taner/Downloads/index.html -->
+<!-- saved from url=(0045)file:///C:/Users/taner/Downloads/index_1.html -->
 <html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -7,11 +7,11 @@
 <meta name="theme-color" content="#0d0d14">
 <title>SeTaFlix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./SeTaFlix_files/css2" rel="stylesheet">
+<link href="./index_files/css2" rel="stylesheet">
 
 <!-- Firebase SDK -->
-<script src="./SeTaFlix_files/firebase-app-compat.min.js.indir"></script>
-<script src="./SeTaFlix_files/firebase-database-compat.min.js.indir"></script>
+<script src="./index_files/firebase-app-compat.min.js.indir"></script>
+<script src="./index_files/firebase-database-compat.min.js.indir"></script>
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -614,9 +614,17 @@ function skipFirebase(){
 }
 
 // Auto-init with built-in config on page load
-window.addEventListener('load', ()=>{
-  initFirebase(SETAFLIX_CONFIG);
-});
+// Retry mechanism in case SDK loads slowly
+function tryInitFirebase(attempts){
+  if(typeof firebase !== 'undefined' && firebase.initializeApp){
+    initFirebase(SETAFLIX_CONFIG);
+  } else if(attempts > 0){
+    setTimeout(()=> tryInitFirebase(attempts - 1), 500);
+  } else {
+    toast('Firebase SDK yüklenemedi. Sayfayı yenile.');
+  }
+}
+window.addEventListener('load', ()=> tryInitFirebase(10));
 
 // ══════════════════════════════════════
 //  LOBBY
