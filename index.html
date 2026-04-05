@@ -881,7 +881,9 @@ function loadVideoUrl(raw, mode, broadcast){
         enableWorker: true,
         lowLatencyMode: false
       });
-      hls.loadSource(raw);
+      const proxyUrl = 'https://setaflix-proxy.onrender.com/proxy?key=setaflix2026&url=';
+const finalUrl = raw.includes('onrender.com') ? raw : proxyUrl + encodeURIComponent(raw);
+hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function(){
         video.play().catch(()=>{});
