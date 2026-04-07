@@ -442,7 +442,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
     </div>
     <div class="input-group">
       <label class="lbl">Database URL</label>
-      <input class="inp" id="fb-dburl" placeholder="https://projem-default-rtdb.firebaseio.com">
+      <input class="inp" id="fb-dburl" placeholder="https://projem-default-rtdb.firebasedatabase.app">
     </div>
     <div class="input-group">
       <label class="lbl">Project ID</label>
@@ -599,7 +599,9 @@ const S = {
   mode: 'youtube', members: {}, fbReady: false,
   myId: 'u_' + Math.random().toString(36).substr(2,8),
   db: null,
-  hls: null  // HLS.js instance
+  hls: null,
+  pendingCookies: null,   // Chrome eklentisinden gelen cookie
+  _autoloadPending: null  // autoload bekleyen fonksiyon
 };
 
 const COLORS = ['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
@@ -654,7 +656,6 @@ function skipFirebase(){
   toast('Demo modda çalışıyor — sadece bu cihazda sync');
 }
 
-// Auto-init with built-in config on page load
 function tryInitFirebase(attempts){
   if(typeof firebase !== 'undefined' && firebase.initializeApp){
     initFirebase(SETAFLIX_CONFIG);
@@ -665,6 +666,32 @@ function tryInitFirebase(attempts){
   }
 }
 window.addEventListener('load', ()=> tryInitFirebase(10));
+
+// ══════════════════════════════════════
+//  AUTOLOAD — Chrome eklentisinden gelen ?autoload= parametresi
+// ══════════════════════════════════════
+function checkAutoload(){
+  const params = new URLSearchParams(window.location.search);
+  const autoload = params.get('autoload');
+  if(!autoload) return;
+
+  // URL'yi hemen temizle
+  window.history.replaceState({}, '', window.location.pathname);
+
+  function doLoad(){
+    document.getElementById('vurl').value = decodeURIComponent(autoload);
+    srcMode('url');
+    loadVideo();
+  }
+
+  // Oda zaten açıksa direkt yükle, değilse oda açılınca yükle
+  if(document.getElementById('room').classList.contains('on')){
+    doLoad();
+  } else {
+    S._autoloadPending = doLoad;
+  }
+}
+window.addEventListener('load', checkAutoload);
 
 // ══════════════════════════════════════
 //  LOBBY
@@ -709,6 +736,11 @@ function enterRoom(){
   if(window.innerWidth <= 640){
     document.getElementById('mob-tog').style.display = 'flex';
   }
+  // Autoload bekleyen varsa çalıştır
+  if(S._autoloadPending){
+    setTimeout(S._autoloadPending, 400);
+    S._autoloadPending = null;
+  }
 }
 
 // ══════════════════════════════════════
@@ -717,17 +749,14 @@ function enterRoom(){
 function fbJoin(){
   const ref = S.db.ref('rooms/' + S.room);
 
-  // Write self
   ref.child('members/' + S.myId).set({
     name: S.user, host: S.isHost,
     color: COLORS[Object.keys(S.members).length % COLORS.length],
     ts: Date.now()
   });
 
-  // Remove self on disconnect
   ref.child('members/' + S.myId).onDisconnect().remove();
 
-  // Listen members
   ref.child('members').on('value', snap => {
     const data = snap.val() || {};
     S.members = {};
@@ -738,21 +767,18 @@ function fbJoin(){
     document.getElementById('vcnt-txt').textContent = Object.keys(S.members).length + ' kişi';
   });
 
-  // Listen chat
   ref.child('chat').limitToLast(50).on('child_added', snap => {
     const d = snap.val();
     if(d.uid === S.myId) return;
     addMsgEl(d.name, d.text, false, d.sys, d.color);
   });
 
-  // Listen sync
   ref.child('sync').on('value', snap => {
     const d = snap.val();
     if(!d || d.uid === S.myId) return;
     applySyncCmd(d);
   });
 
-  // Listen reactions
   ref.child('react').limitToLast(10).on('child_added', snap => {
     const d = snap.val();
     if(d.uid === S.myId) return;
@@ -851,7 +877,6 @@ function isM3u8(url){
 function loadVideoUrl(raw, mode, broadcast){
   const cont = document.getElementById('vcont');
 
-  // Önceki HLS instance'ı temizle
   destroyHls();
 
   // ─── YouTube ───
@@ -881,9 +906,15 @@ function loadVideoUrl(raw, mode, broadcast){
         enableWorker: true,
         lowLatencyMode: false
       });
-      const proxyUrl = 'https://setaflix-proxy.onrender.com/proxy?key=setaflix2026&url=';
-const finalUrl = raw.includes('onrender.com') ? raw : proxyUrl + encodeURIComponent(raw);
-hls.loadSource(finalUrl);
+
+      // Cookie desteği: S.pendingCookies varsa proxy URL'ye ekle
+      const cookieParam = S.pendingCookies ? '&cookies=' + encodeURIComponent(S.pendingCookies) : '';
+      S.pendingCookies = null; // bir kez kullan, temizle
+
+      const proxyUrl = 'https://setaflix-proxy.onrender.com/proxy?key=setaflix2026' + cookieParam + '&url=';
+      const finalUrl = raw.includes('onrender.com') ? raw : proxyUrl + encodeURIComponent(raw);
+
+      hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function(){
         video.play().catch(()=>{});
@@ -905,7 +936,6 @@ hls.loadSource(finalUrl);
       });
       S.hls = hls;
     } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-      // Safari doğal HLS desteği
       video.src = raw;
       video.addEventListener('loadedmetadata', ()=> video.play().catch(()=>{}));
     } else {
@@ -969,11 +999,9 @@ function loadSubtitle(){
   const video = document.querySelector('#vcont video');
   if(!video){ toast('Önce video yükle!'); return; }
 
-  // Mevcut track'leri temizle
   const oldTracks = video.querySelectorAll('track');
   oldTracks.forEach(t => t.remove());
 
-  // Yeni track ekle
   const track = document.createElement('track');
   track.kind = 'subtitles';
   track.label = url.includes('tur') ? 'Türkçe' : url.includes('eng') ? 'English' : 'Altyazı';
@@ -982,7 +1010,6 @@ function loadSubtitle(){
   track.default = true;
   video.appendChild(track);
 
-  // Track yüklendiğinde aktif et
   track.addEventListener('load', function(){
     if(video.textTracks.length > 0){
       video.textTracks[0].mode = 'showing';
@@ -996,7 +1023,6 @@ function loadSubtitle(){
     toast('Altyazı yüklenemedi — URL kontrol et');
   });
 
-  // textTracks'i aktif et
   setTimeout(()=>{
     if(video.textTracks.length > 0){
       video.textTracks[0].mode = 'showing';
@@ -1005,7 +1031,6 @@ function loadSubtitle(){
     }
   }, 500);
 
-  // Sync ile diğer kişiye de gönder
   if(S.fbReady){
     fbSync({ cmd:'subtitle', url: url, name: S.user });
     fbChat(S.user + ' altyazı ekledi.', true);
@@ -1019,7 +1044,6 @@ function removeSubtitle(){
   const tracks = video.querySelectorAll('track');
   tracks.forEach(t => t.remove());
 
-  // textTracks'i kapat
   for(let i = 0; i < video.textTracks.length; i++){
     video.textTracks[i].mode = 'disabled';
   }
@@ -1162,7 +1186,6 @@ function toast(msg){
   _tt = setTimeout(()=>t.classList.remove('on'), 2800);
 }
 
-// Enter key lobby
 document.addEventListener('keydown', e=>{
   if(e.key==='Enter'){
     const lob = document.getElementById('lobby');
