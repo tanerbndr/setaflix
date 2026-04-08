@@ -493,6 +493,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
   </div>
 
   <button style="margin-top:1.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="document.getElementById('fb-modal').classList.remove('hidden')">⚙️ Firebase Ayarları</button>
+  <button style="margin-top:0.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="setProxyBase()">🔧 Proxy URL</button>
 </div>
 
 <!-- ═══ ROOM ═══ -->
@@ -600,8 +601,8 @@ const S = {
   myId: 'u_' + Math.random().toString(36).substr(2,8),
   db: null,
   hls: null,
-  pendingCookies: null,   // Chrome eklentisinden gelen cookie
-  _autoloadPending: null  // autoload bekleyen fonksiyon
+  pendingCookies: null,
+  _autoloadPending: null
 };
 
 const COLORS = ['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
@@ -675,7 +676,6 @@ function checkAutoload(){
   const autoload = params.get('autoload');
   if(!autoload) return;
 
-  // URL'yi hemen temizle
   window.history.replaceState({}, '', window.location.pathname);
 
   function doLoad(){
@@ -684,7 +684,6 @@ function checkAutoload(){
     loadVideo();
   }
 
-  // Oda zaten açıksa direkt yükle, değilse oda açılınca yükle
   if(document.getElementById('room').classList.contains('on')){
     doLoad();
   } else {
@@ -736,7 +735,6 @@ function enterRoom(){
   if(window.innerWidth <= 640){
     document.getElementById('mob-tog').style.display = 'flex';
   }
-  // Autoload bekleyen varsa çalıştır
   if(S._autoloadPending){
     setTimeout(S._autoloadPending, 400);
     S._autoloadPending = null;
@@ -907,12 +905,12 @@ function loadVideoUrl(raw, mode, broadcast){
         lowLatencyMode: false
       });
 
-      // Cookie desteği: S.pendingCookies varsa proxy URL'ye ekle
       const cookieParam = S.pendingCookies ? '&cookies=' + encodeURIComponent(S.pendingCookies) : '';
-      S.pendingCookies = null; // bir kez kullan, temizle
+      S.pendingCookies = null;
 
-     const proxyUrl = 'https://montana-defined-carlo-advanced.trycloudflare.com/proxy?key=setaflix2026' + cookieParam + '&url=';
-     const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com')) ? raw : proxyUrl + encodeURIComponent(raw);
+      const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
+      const proxyUrl = savedBase + '/proxy?key=setaflix2026' + cookieParam + '&url=';
+      const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com')) ? raw : proxyUrl + encodeURIComponent(raw);
 
       hls.loadSource(finalUrl);
       hls.attachMedia(video);
@@ -1171,6 +1169,15 @@ function toggleMobSidebar(){
 // ══════════════════════════════════════
 //  UTILS
 // ══════════════════════════════════════
+function setProxyBase(){
+  const current = localStorage.getItem('sf_proxy_base') || '';
+  const val = prompt('Tunnel URL gir (https://xxxx.trycloudflare.com):', current);
+  if(val !== null && val.trim()){
+    localStorage.setItem('sf_proxy_base', val.trim().replace(/\/$/, ''));
+    toast('Proxy URL kaydedildi ✓');
+  }
+}
+
 function v(id){ return document.getElementById(id).value.trim(); }
 function show(id){ document.getElementById(id).classList.add('on'); }
 function hide(id){ document.getElementById(id).classList.remove('on'); }
