@@ -911,7 +911,7 @@ function loadVideoUrl(raw, mode, broadcast){
       const cookieParam = S.pendingCookies ? '&cookies=' + encodeURIComponent(S.pendingCookies) : '';
       S.pendingCookies = null; // bir kez kullan, temizle
 
-      const proxyUrl = 'https://setaflix-proxy.onrender.com/proxy?key=setaflix2026' + cookieParam + '&url=';
+     const proxyUrl = 'https://fact-etc-wesley-mile.trycloudflare.com/proxy?key=setaflix2026' + cookieParam + '&url=';
       const finalUrl = raw.includes('onrender.com') ? raw : proxyUrl + encodeURIComponent(raw);
 
       hls.loadSource(finalUrl);
