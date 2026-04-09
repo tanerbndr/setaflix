@@ -602,7 +602,10 @@ const S = {
   db: null,
   hls: null,
   pendingCookies: null,
-  _autoloadPending: null
+  _autoloadPending: null,
+  _directLoad: false,
+  _audioUrl: null,
+  _subtitleUrl: null
 };
 
 const COLORS = ['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
@@ -675,7 +678,10 @@ function checkAutoload(){
   const params = new URLSearchParams(window.location.search);
   const autoload = params.get('autoload');
   if(!autoload) return;
-  S._directLoad = params.get('direct') === '1';
+
+  S._directLoad  = params.get('direct') === '1';
+  S._audioUrl    = params.get('audio')    ? decodeURIComponent(params.get('audio'))    : null;
+  S._subtitleUrl = params.get('subtitle') ? decodeURIComponent(params.get('subtitle')) : null;
 
   window.history.replaceState({}, '', window.location.pathname);
 
@@ -911,14 +917,24 @@ function loadVideoUrl(raw, mode, broadcast){
 
       const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
       const proxyUrl = savedBase + '/proxy?key=setaflix2026' + cookieParam + '&url=';
-const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com') || S._directLoad) ? raw : proxyUrl + encodeURIComponent(raw);
-S._directLoad = false;
-hls.loadSource(finalUrl);
-hls.attachMedia(video);
+      const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com') || S._directLoad) ? raw : proxyUrl + encodeURIComponent(raw);
+      S._directLoad = false;
 
       hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function(){
+        // Ses track seçimi
+        if (S._audioUrl) {
+          const trackIdx = hls.audioTracks.findIndex(t => t.url === S._audioUrl);
+          if (trackIdx !== -1) hls.audioTrack = trackIdx;
+          S._audioUrl = null;
+        }
+        // Altyazı otomatik yükle
+        if (S._subtitleUrl) {
+          document.getElementById('suburl').value = S._subtitleUrl;
+          loadSubtitle();
+          S._subtitleUrl = null;
+        }
         video.play().catch(()=>{});
       });
       hls.on(Hls.Events.ERROR, function(event, data){
