@@ -911,7 +911,10 @@ function loadVideoUrl(raw, mode, broadcast){
 
       const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
       const proxyUrl = savedBase + '/proxy?key=setaflix2026' + cookieParam + '&url=';
-      const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com')) ? raw : proxyUrl + encodeURIComponent(raw);
+      const proxyUrl = savedBase + '/proxy?key=setaflix2026' + cookieParam + '&url=';
+const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com') || S._directLoad) ? raw : proxyUrl + encodeURIComponent(raw);
+S._directLoad = false;
+hls.loadSource(finalUrl);
 
       hls.loadSource(finalUrl);
       hls.attachMedia(video);
