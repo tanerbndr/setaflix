@@ -923,6 +923,8 @@ function loadVideoUrl(raw, mode, broadcast){
       hls.loadSource(finalUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function(){
+      console.log('TRACKS:', JSON.stringify(hls.audioTracks));
+  console.log('AUDIO_URL:', S._audioUrl);
         // Ses track seçimi
         if (S._audioUrl) {
           const trackIdx = hls.audioTracks.findIndex(t => t.url === S._audioUrl);
