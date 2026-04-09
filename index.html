@@ -675,6 +675,7 @@ function checkAutoload(){
   const params = new URLSearchParams(window.location.search);
   const autoload = params.get('autoload');
   if(!autoload) return;
+  S._directLoad = params.get('direct') === '1';
 
   window.history.replaceState({}, '', window.location.pathname);
 
