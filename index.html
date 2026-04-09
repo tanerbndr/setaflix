@@ -9,293 +9,277 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-
 <!-- Firebase SDK (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <!-- HLS.js — m3u8 desteği için -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7"></script>
-
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0d0d14;
-  --s1:#13131f;
-  --s2:#1a1a2a;
-  --s3:#232336;
-  --acc:#6c47ff;
-  --acc2:#a78bfa;
-  --acc3:#38bdf8;
-  --txt:#eeeaf8;
-  --txt2:#8b87a8;
-  --txt3:#4a4768;
-  --brd:rgba(108,71,255,0.18);
-  --brd2:rgba(255,255,255,0.06);
-  --ok:#22d3a0;
-  --err:#f87171;
+--bg:#0d0d14;
+--s1:#13131f;
+--s2:#1a1a2a;
+--s3:#232336;
+--acc:#6c47ff;
+--acc2:#a78bfa;
+--acc3:#38bdf8;
+--txt:#eeeaf8;
+--txt2:#8b87a8;
+--txt3:#4a4768;
+--brd:rgba(108,71,255,0.18);
+--brd2:rgba(255,255,255,0.06);
+--ok:#22d3a0;
+--err:#f87171;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:16px}
-
 /* ─── SCREENS ─── */
 .scr{display:none;height:100vh;width:100%}
 .scr.on{display:flex}
-
 /* ─── LOBBY ─── */
 #lobby{
-  flex-direction:column;align-items:center;justify-content:center;
-  padding:1.5rem;position:relative;overflow:hidden;
+flex-direction:column;align-items:center;justify-content:center;
+padding:1.5rem;position:relative;overflow:hidden;
 }
 #lobby::before{
-  content:'';position:absolute;width:800px;height:800px;
-  background:radial-gradient(circle,rgba(108,71,255,0.1) 0%,transparent 65%);
-  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+content:'';position:absolute;width:800px;height:800px;
+background:radial-gradient(circle,rgba(108,71,255,0.1) 0%,transparent 65%);
+top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
 }
 #lobby::after{
-  content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236c47ff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  pointer-events:none;
+content:'';position:absolute;inset:0;
+background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236c47ff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+pointer-events:none;
 }
 .logo{
-  font-family:'Syne',sans-serif;font-size:clamp(2rem,8vw,3rem);font-weight:800;
-  background:linear-gradient(135deg,#a78bfa,#6c47ff,#38bdf8);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  letter-spacing:-1.5px;margin-bottom:0.3rem;position:relative;z-index:1;
+font-family:'Syne',sans-serif;font-size:clamp(2rem,8vw,3rem);font-weight:800;
+background:linear-gradient(135deg,#a78bfa,#6c47ff,#38bdf8);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+letter-spacing:-1.5px;margin-bottom:0.3rem;position:relative;z-index:1;
 }
 .sub{color:var(--txt2);font-size:0.9rem;font-weight:300;margin-bottom:2.5rem;position:relative;z-index:1;}
 .card{
-  background:var(--s1);border:1px solid var(--brd);border-radius:20px;
-  padding:2rem;width:100%;max-width:400px;position:relative;z-index:1;
+background:var(--s1);border:1px solid var(--brd);border-radius:20px;
+padding:2rem;width:100%;max-width:400px;position:relative;z-index:1;
 }
 .tabs{display:flex;background:var(--s2);border-radius:10px;padding:3px;margin-bottom:1.8rem;gap:3px;}
 .tab{
-  flex:1;padding:0.55rem;border:none;border-radius:8px;
-  background:transparent;color:var(--txt2);font-family:'DM Sans',sans-serif;
-  font-size:0.88rem;cursor:pointer;transition:all 0.2s;
+flex:1;padding:0.55rem;border:none;border-radius:8px;
+background:transparent;color:var(--txt2);font-family:'DM Sans',sans-serif;
+font-size:0.88rem;cursor:pointer;transition:all 0.2s;
 }
 .tab.on{background:var(--acc);color:#fff;font-weight:500;}
 .panel{display:none;}
 .panel.on{display:block;}
 .lbl{
-  display:block;font-size:0.72rem;color:var(--txt2);
-  text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.45rem;font-weight:500;
+display:block;font-size:0.72rem;color:var(--txt2);
+text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.45rem;font-weight:500;
 }
 .inp{
-  width:100%;background:var(--s2);border:1px solid var(--brd2);
-  border-radius:10px;padding:0.75rem 1rem;color:var(--txt);
-  font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;
-  transition:border-color 0.2s;margin-bottom:1rem;
+width:100%;background:var(--s2);border:1px solid var(--brd2);
+border-radius:10px;padding:0.75rem 1rem;color:var(--txt);
+font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;
+transition:border-color 0.2s;margin-bottom:1rem;
 }
 .inp:focus{border-color:var(--acc);}
 .inp::placeholder{color:var(--txt3);}
 .btn{
-  width:100%;padding:0.85rem;background:var(--acc);color:#fff;
-  border:none;border-radius:10px;font-family:'Syne',sans-serif;
-  font-size:0.95rem;font-weight:700;cursor:pointer;
-  transition:all 0.2s;letter-spacing:0.03em;margin-top:0.3rem;
+width:100%;padding:0.85rem;background:var(--acc);color:#fff;
+border:none;border-radius:10px;font-family:'Syne',sans-serif;
+font-size:0.95rem;font-weight:700;cursor:pointer;
+transition:all 0.2s;letter-spacing:0.03em;margin-top:0.3rem;
 }
 .btn:hover{background:#5a38e0;transform:translateY(-1px);}
 .btn:active{transform:translateY(0);}
 .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 .feats{
-  display:flex;flex-wrap:wrap;gap:0.8rem;margin-top:2rem;
-  justify-content:center;max-width:380px;position:relative;z-index:1;
+display:flex;flex-wrap:wrap;gap:0.8rem;margin-top:2rem;
+justify-content:center;max-width:380px;position:relative;z-index:1;
 }
 .feat{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--txt2);}
 .fdot{width:5px;height:5px;border-radius:50%;background:var(--acc);flex-shrink:0;}
-
 /* ─── ROOM ─── */
 #room{flex-direction:column;height:100vh;}
-
 .rhead{
-  display:flex;align-items:center;gap:0.6rem;
-  padding:0.65rem 1rem;background:var(--s1);
-  border-bottom:1px solid var(--brd2);flex-shrink:0;
-  min-height:52px;
+display:flex;align-items:center;gap:0.6rem;
+padding:0.65rem 1rem;background:var(--s1);
+border-bottom:1px solid var(--brd2);flex-shrink:0;
+min-height:52px;
 }
 .rlogo{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
-  background:linear-gradient(135deg,#a78bfa,#6c47ff);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;white-space:nowrap;flex-shrink:0;
+font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+background:linear-gradient(135deg,#a78bfa,#6c47ff);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+background-clip:text;white-space:nowrap;flex-shrink:0;
 }
 .rid{
-  display:flex;align-items:center;gap:6px;
-  background:var(--s2);border:1px solid var(--brd);
-  border-radius:8px;padding:0.35rem 0.7rem;
-  font-size:0.78rem;cursor:pointer;flex:1;max-width:220px;
-  transition:border-color 0.2s;
+display:flex;align-items:center;gap:6px;
+background:var(--s2);border:1px solid var(--brd);
+border-radius:8px;padding:0.35rem 0.7rem;
+font-size:0.78rem;cursor:pointer;flex:1;max-width:220px;
+transition:border-color 0.2s;
 }
 .rid:hover{border-color:var(--acc2);}
 .rid strong{color:var(--acc2);font-family:monospace;letter-spacing:0.08em;}
 .rid span{color:var(--txt3);font-size:0.7rem;margin-left:auto;}
 .vcnt{
-  display:flex;align-items:center;gap:5px;
-  color:var(--txt2);font-size:0.78rem;white-space:nowrap;
+display:flex;align-items:center;gap:5px;
+color:var(--txt2);font-size:0.78rem;white-space:nowrap;
 }
 .ldot{
-  width:6px;height:6px;border-radius:50%;background:var(--ok);
-  animation:pulse 1.8s ease infinite;
+width:6px;height:6px;border-radius:50%;background:var(--ok);
+animation:pulse 1.8s ease infinite;
 }
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
 .bleave{
-  background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);
-  color:var(--err);padding:0.35rem 0.7rem;border-radius:8px;
-  font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:all 0.2s;
-  font-family:'DM Sans',sans-serif;flex-shrink:0;
+background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);
+color:var(--err);padding:0.35rem 0.7rem;border-radius:8px;
+font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:all 0.2s;
+font-family:'DM Sans',sans-serif;flex-shrink:0;
 }
 .bleave:hover{background:rgba(248,113,113,0.2);}
-
 /* ─── ROOM BODY ─── */
 .rbody{display:flex;flex:1;overflow:hidden;min-height:0;}
-
 /* VIDEO */
 .varea{
-  flex:1;display:flex;flex-direction:column;
-  background:#080810;min-width:0;overflow:hidden;
+flex:1;display:flex;flex-direction:column;
+background:#080810;min-width:0;overflow:hidden;
 }
 .vwrap{
-  flex:1;position:relative;display:flex;
-  align-items:center;justify-content:center;
-  background:#05050e;min-height:0;overflow:hidden;
+flex:1;position:relative;display:flex;
+align-items:center;justify-content:center;
+background:#05050e;min-height:0;overflow:hidden;
 }
 #vcont{width:100%;height:100%;position:relative;}
 #vcont iframe,#vcont video{width:100%;height:100%;border:none;display:block;}
 .vph{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;height:100%;gap:1rem;color:var(--txt3);
-  padding:2rem;text-align:center;
+display:flex;flex-direction:column;align-items:center;
+justify-content:center;height:100%;gap:1rem;color:var(--txt3);
+padding:2rem;text-align:center;
 }
 .vph-icon{
-  width:64px;height:64px;border-radius:50%;
-  background:var(--s2);border:1px solid var(--brd);
-  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+width:64px;height:64px;border-radius:50%;
+background:var(--s2);border:1px solid var(--brd);
+display:flex;align-items:center;justify-content:center;font-size:1.6rem;
 }
 .vph p{font-size:0.9rem;color:var(--txt2);}
 .vph small{font-size:0.78rem;color:var(--txt3);}
-
 /* VIDEO CONTROLS */
 .vctl{
-  display:flex;align-items:center;gap:0.5rem;
-  padding:0.6rem 0.8rem;background:var(--s1);
-  border-top:1px solid var(--brd2);flex-wrap:wrap;flex-shrink:0;
+display:flex;align-items:center;gap:0.5rem;
+padding:0.6rem 0.8rem;background:var(--s1);
+border-top:1px solid var(--brd2);flex-wrap:wrap;flex-shrink:0;
 }
 .srctabs{display:flex;gap:3px;flex-shrink:0;}
 .stab{
-  padding:0.4rem 0.65rem;border-radius:7px;
-  border:1px solid var(--brd2);background:transparent;
-  color:var(--txt2);font-size:0.75rem;cursor:pointer;
-  transition:all 0.2s;font-family:'DM Sans',sans-serif;
+padding:0.4rem 0.65rem;border-radius:7px;
+border:1px solid var(--brd2);background:transparent;
+color:var(--txt2);font-size:0.75rem;cursor:pointer;
+transition:all 0.2s;font-family:'DM Sans',sans-serif;
 }
 .stab.on{background:var(--s2);border-color:var(--acc);color:var(--acc2);}
 .vinrow{display:flex;flex:1;gap:5px;min-width:150px;}
 .vinrow input{
-  flex:1;background:var(--s2);border:1px solid var(--brd2);
-  border-radius:8px;padding:0.45rem 0.7rem;color:var(--txt);
-  font-size:0.78rem;outline:none;min-width:0;
+flex:1;background:var(--s2);border:1px solid var(--brd2);
+border-radius:8px;padding:0.45rem 0.7rem;color:var(--txt);
+font-size:0.78rem;outline:none;min-width:0;
 }
 .vinrow input:focus{border-color:var(--acc);}
 .vinrow input::placeholder{color:var(--txt3);}
 .bsm{
-  padding:0.45rem 0.8rem;background:var(--acc);color:#fff;
-  border:none;border-radius:8px;font-size:0.78rem;
-  cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;
-  transition:background 0.2s;flex-shrink:0;
+padding:0.45rem 0.8rem;background:var(--acc);color:#fff;
+border:none;border-radius:8px;font-size:0.78rem;
+cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;
+transition:background 0.2s;flex-shrink:0;
 }
 .bsm:hover{background:#5a38e0;}
 .bsm.ol{
-  background:transparent;border:1px solid var(--brd);
-  color:var(--txt2);
+background:transparent;border:1px solid var(--brd);
+color:var(--txt2);
 }
 .bsm.ol:hover{background:var(--s2);color:var(--txt);}
-
 /* SUBTITLE BAR */
 .subbar{
-  display:flex;align-items:center;gap:5px;
-  padding:0.45rem 0.8rem;background:var(--s1);
-  border-top:1px solid var(--brd2);flex-shrink:0;flex-wrap:wrap;
+display:flex;align-items:center;gap:5px;
+padding:0.45rem 0.8rem;background:var(--s1);
+border-top:1px solid var(--brd2);flex-shrink:0;flex-wrap:wrap;
 }
 .subbar input{
-  flex:1;background:var(--s2);border:1px solid var(--brd2);
-  border-radius:8px;padding:0.4rem 0.7rem;color:var(--txt);
-  font-size:0.75rem;outline:none;min-width:120px;
+flex:1;background:var(--s2);border:1px solid var(--brd2);
+border-radius:8px;padding:0.4rem 0.7rem;color:var(--txt);
+font-size:0.75rem;outline:none;min-width:120px;
 }
 .subbar input:focus{border-color:var(--acc);}
 .subbar input::placeholder{color:var(--txt3);}
 .sub-label{font-size:0.72rem;color:var(--txt2);white-space:nowrap;}
 .sub-active{color:var(--ok);font-size:0.72rem;white-space:nowrap;}
-
 /* Video subtitle styling */
 #vcont video::cue{
-  background:rgba(0,0,0,0.8);
-  color:#fff;
-  font-family:'DM Sans',sans-serif;
-  font-size:1.1rem;
-  line-height:1.4;
-  padding:2px 6px;
-  border-radius:4px;
+background:rgba(0,0,0,0.8);
+color:#fff;
+font-family:'DM Sans',sans-serif;
+font-size:1.1rem;
+line-height:1.4;
+padding:2px 6px;
+border-radius:4px;
 }
-
 /* SYNC BAR */
 .syncbar{
-  display:flex;align-items:center;gap:8px;
-  padding:0.4rem 0.8rem;background:rgba(108,71,255,0.08);
-  border-top:1px solid rgba(108,71,255,0.15);font-size:0.75rem;
-  color:var(--acc2);flex-shrink:0;
+display:flex;align-items:center;gap:8px;
+padding:0.4rem 0.8rem;background:rgba(108,71,255,0.08);
+border-top:1px solid rgba(108,71,255,0.15);font-size:0.75rem;
+color:var(--acc2);flex-shrink:0;
 }
 .syncbar.hidden{display:none;}
 .sync-dot{width:5px;height:5px;border-radius:50%;background:var(--acc2);}
-
 /* ─── SIDEBAR ─── */
 .sidebar{
-  width:280px;flex-shrink:0;display:flex;flex-direction:column;
-  background:var(--s1);border-left:1px solid var(--brd2);overflow:hidden;
+width:280px;flex-shrink:0;display:flex;flex-direction:column;
+background:var(--s1);border-left:1px solid var(--brd2);overflow:hidden;
 }
 .stabs{display:flex;border-bottom:1px solid var(--brd2);}
 .stab2{
-  flex:1;padding:0.7rem 0.5rem;background:transparent;border:none;
-  color:var(--txt2);font-size:0.8rem;cursor:pointer;
-  font-family:'DM Sans',sans-serif;position:relative;transition:color 0.2s;
+flex:1;padding:0.7rem 0.5rem;background:transparent;border:none;
+color:var(--txt2);font-size:0.8rem;cursor:pointer;
+font-family:'DM Sans',sans-serif;position:relative;transition:color 0.2s;
 }
 .stab2.on{color:var(--acc2);}
 .stab2.on::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:var(--acc);border-radius:2px 2px 0 0;
+content:'';position:absolute;bottom:0;left:0;right:0;
+height:2px;background:var(--acc);border-radius:2px 2px 0 0;
 }
 .spanel{display:none;flex-direction:column;flex:1;overflow:hidden;}
 .spanel.on{display:flex;}
-
 /* MEMBERS */
 .mlist{flex:1;overflow-y:auto;padding:0.6rem;}
 .mi{
-  display:flex;align-items:center;gap:8px;
-  padding:0.55rem 0.4rem;border-radius:8px;transition:background 0.15s;
+display:flex;align-items:center;gap:8px;
+padding:0.55rem 0.4rem;border-radius:8px;transition:background 0.15s;
 }
 .mi:hover{background:var(--s2);}
 .av{
-  width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.75rem;font-weight:600;flex-shrink:0;
+width:32px;height:32px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-size:0.75rem;font-weight:600;flex-shrink:0;
 }
 .mname{font-size:0.85rem;font-weight:500;}
 .mrole{font-size:0.7rem;color:var(--txt3);}
 .hbadge{
-  margin-left:auto;font-size:0.65rem;
-  background:rgba(108,71,255,0.15);color:var(--acc2);
-  padding:2px 6px;border-radius:4px;border:1px solid rgba(108,71,255,0.2);
+margin-left:auto;font-size:0.65rem;
+background:rgba(108,71,255,0.15);color:var(--acc2);
+padding:2px 6px;border-radius:4px;border:1px solid rgba(108,71,255,0.2);
 }
 .oonline{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0;}
-
 /* CHAT */
 .msgs{
-  flex:1;overflow-y:auto;padding:0.6rem;
-  display:flex;flex-direction:column;gap:5px;
+flex:1;overflow-y:auto;padding:0.6rem;
+display:flex;flex-direction:column;gap:5px;
 }
 .msg{
-  display:flex;flex-direction:column;gap:2px;
-  padding:0.45rem 0.55rem;border-radius:8px;
-  background:var(--s2);animation:min 0.2s ease;
+display:flex;flex-direction:column;gap:2px;
+padding:0.45rem 0.55rem;border-radius:8px;
+background:var(--s2);animation:min 0.2s ease;
 }
 @keyframes min{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .msg.own{background:rgba(108,71,255,0.12);border:1px solid rgba(108,71,255,0.15);}
@@ -304,117 +288,111 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 .mtxt{font-size:0.82rem;color:var(--txt);line-height:1.45;word-break:break-word;}
 .msg.sys .mtxt{color:var(--txt3);font-size:0.72rem;}
 .reacts{
-  display:flex;gap:5px;padding:0.45rem 0.6rem;
-  border-top:1px solid var(--brd2);flex-wrap:wrap;
+display:flex;gap:5px;padding:0.45rem 0.6rem;
+border-top:1px solid var(--brd2);flex-wrap:wrap;
 }
 .rb{
-  background:var(--s2);border:1px solid var(--brd2);
-  border-radius:6px;padding:3px 7px;font-size:0.95rem;
-  cursor:pointer;transition:all 0.15s;
+background:var(--s2);border:1px solid var(--brd2);
+border-radius:6px;padding:3px 7px;font-size:0.95rem;
+cursor:pointer;transition:all 0.15s;
 }
 .rb:hover{background:var(--s3);transform:scale(1.15);}
 .cinput{
-  padding:0.6rem;border-top:1px solid var(--brd2);
-  display:flex;gap:5px;
+padding:0.6rem;border-top:1px solid var(--brd2);
+display:flex;gap:5px;
 }
 .cinput input{
-  flex:1;background:var(--s2);border:1px solid var(--brd2);
-  border-radius:8px;padding:0.48rem 0.7rem;color:var(--txt);
-  font-size:0.82rem;outline:none;
+flex:1;background:var(--s2);border:1px solid var(--brd2);
+border-radius:8px;padding:0.48rem 0.7rem;color:var(--txt);
+font-size:0.82rem;outline:none;
 }
 .cinput input:focus{border-color:var(--acc);}
 .cinput input::placeholder{color:var(--txt3);}
 .bsend{
-  width:34px;height:34px;background:var(--acc);border:none;
-  border-radius:8px;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0.9rem;transition:background 0.2s;flex-shrink:0;
+width:34px;height:34px;background:var(--acc);border:none;
+border-radius:8px;color:#fff;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+font-size:0.9rem;transition:background 0.2s;flex-shrink:0;
 }
 .bsend:hover{background:#5a38e0;}
-
 /* FLOAT REACTIONS */
 .frcts{position:fixed;bottom:160px;right:295px;pointer-events:none;z-index:999;}
 .fr{position:absolute;font-size:1.6rem;animation:fup 2s ease forwards;pointer-events:none;}
 @keyframes fup{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(1.4)}}
-
 /* TOAST */
 .toast{
-  position:fixed;bottom:1.2rem;left:50%;
-  transform:translateX(-50%) translateY(80px);
-  background:var(--s2);border:1px solid var(--acc);
-  color:var(--txt);padding:0.55rem 1.1rem;
-  border-radius:10px;font-size:0.82rem;z-index:1000;
-  transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;
+position:fixed;bottom:1.2rem;left:50%;
+transform:translateX(-50%) translateY(80px);
+background:var(--s2);border:1px solid var(--acc);
+color:var(--txt);padding:0.55rem 1.1rem;
+border-radius:10px;font-size:0.82rem;z-index:1000;
+transition:transform 0.3s ease;white-space:nowrap;pointer-events:none;
 }
 .toast.on{transform:translateX(-50%) translateY(0);}
-
 /* FIREBASE CONFIG MODAL */
 .modal-bg{
-  position:fixed;inset:0;background:rgba(0,0,0,0.75);
-  z-index:2000;display:flex;align-items:center;justify-content:center;
-  padding:1rem;
+position:fixed;inset:0;background:rgba(0,0,0,0.75);
+z-index:2000;display:flex;align-items:center;justify-content:center;
+padding:1rem;
 }
 .modal-bg.hidden{display:none;}
 .modal{
-  background:var(--s1);border:1px solid var(--brd);
-  border-radius:20px;padding:2rem;width:100%;max-width:480px;
-  max-height:90vh;overflow-y:auto;
+background:var(--s1);border:1px solid var(--brd);
+border-radius:20px;padding:2rem;width:100%;max-width:480px;
+max-height:90vh;overflow-y:auto;
 }
 .modal h2{font-family:'Syne',sans-serif;font-size:1.3rem;margin-bottom:0.4rem;}
 .modal p{font-size:0.84rem;color:var(--txt2);line-height:1.6;margin-bottom:1.2rem;}
 .modal code{
-  display:block;background:var(--s2);border:1px solid var(--brd2);
-  border-radius:8px;padding:0.8rem;font-size:0.75rem;color:var(--acc2);
-  margin-bottom:1rem;white-space:pre-wrap;word-break:break-all;line-height:1.5;
+display:block;background:var(--s2);border:1px solid var(--brd2);
+border-radius:8px;padding:0.8rem;font-size:0.75rem;color:var(--acc2);
+margin-bottom:1rem;white-space:pre-wrap;word-break:break-all;line-height:1.5;
 }
 .modal-btns{display:flex;gap:0.5rem;margin-top:1rem;}
 .modal-btns .btn{margin-top:0;}
 .bcancel{
-  flex:1;padding:0.75rem;background:transparent;
-  border:1px solid var(--brd);border-radius:10px;
-  color:var(--txt2);cursor:pointer;font-family:'DM Sans',sans-serif;
-  font-size:0.9rem;transition:all 0.2s;
+flex:1;padding:0.75rem;background:transparent;
+border:1px solid var(--brd);border-radius:10px;
+color:var(--txt2);cursor:pointer;font-family:'DM Sans',sans-serif;
+font-size:0.9rem;transition:all 0.2s;
 }
 .bcancel:hover{background:var(--s2);}
 .step{
-  display:flex;align-items:flex-start;gap:10px;
-  margin-bottom:1rem;padding:0.75rem;
-  background:var(--s2);border-radius:10px;
+display:flex;align-items:flex-start;gap:10px;
+margin-bottom:1rem;padding:0.75rem;
+background:var(--s2);border-radius:10px;
 }
 .snum{
-  width:24px;height:24px;border-radius:50%;background:var(--acc);
-  color:#fff;font-size:0.75rem;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+width:24px;height:24px;border-radius:50%;background:var(--acc);
+color:#fff;font-size:0.75rem;font-weight:700;
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .stxt{font-size:0.82rem;color:var(--txt2);line-height:1.5;}
 .stxt a{color:var(--acc2);}
 .stxt strong{color:var(--txt);}
-
 /* MOBILE SIDEBAR TOGGLE */
 .mob-stoggle{
-  display:none;position:fixed;bottom:1rem;right:1rem;
-  width:46px;height:46px;background:var(--acc);border:none;
-  border-radius:50%;color:#fff;font-size:1.2rem;cursor:pointer;
-  z-index:100;box-shadow:0 4px 20px rgba(108,71,255,0.4);
+display:none;position:fixed;bottom:1rem;right:1rem;
+width:46px;height:46px;background:var(--acc);border:none;
+border-radius:50%;color:#fff;font-size:1.2rem;cursor:pointer;
+z-index:100;box-shadow:0 4px 20px rgba(108,71,255,0.4);
 }
-
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px;}
-
 /* ─── RESPONSIVE ─── */
 @media(max-width:640px){
-  .sidebar{
-    display:none;position:fixed;bottom:0;left:0;right:0;
-    height:60vh;z-index:100;border-left:none;
-    border-top:1px solid var(--brd2);border-radius:16px 16px 0 0;
-  }
-  .sidebar.mob-open{display:flex;}
-  .mob-stoggle{display:flex;align-items:center;justify-content:center;}
-  .vctl{gap:4px;}
-  .rhead{gap:0.4rem;}
-  .logo{font-size:2rem;}
+.sidebar{
+display:none;position:fixed;bottom:0;left:0;right:0;
+height:60vh;z-index:100;border-left:none;
+border-top:1px solid var(--brd2);border-radius:16px 16px 0 0;
+}
+.sidebar.mob-open{display:flex;}
+.mob-stoggle{display:flex;align-items:center;justify-content:center;}
+.vctl{gap:4px;}
+.rhead{gap:0.4rem;}
+.logo{font-size:2rem;}
 }
 </style>
 </head>
@@ -422,164 +400,148 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 
 <!-- ═══ FIREBASE CONFIG MODAL ═══ -->
 <div class="modal-bg hidden" id="fb-modal">
-  <div class="modal">
-    <h2>🔥 Firebase Kurulumu</h2>
-    <p>Gerçek zamanlı senkronizasyon için Firebase config bilgilerini gir. Sadece bir kere yapman yeterli, tarayıcıya kaydedilir.</p>
-
-    <div class="step"><div class="snum">1</div><div class="stxt"><a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> adresine git → <strong>Proje oluştur</strong></div></div>
-    <div class="step"><div class="snum">2</div><div class="stxt">Sol menü → <strong>Build → Realtime Database</strong> → <strong>Create database</strong> → <strong>Test mode</strong> seç</div></div>
-    <div class="step"><div class="snum">3</div><div class="stxt">Proje ayarları (⚙️) → <strong>General</strong> → Web uygulaması ekle → <strong>firebaseConfig</strong> kopyala</div></div>
-
-    <p style="margin-top:1rem;">Config nesnesindeki değerleri aşağıya gir:</p>
-
-    <div class="input-group">
-      <label class="lbl">API Key</label>
-      <input class="inp" id="fb-apikey" placeholder="AIzaSy...">
-    </div>
-    <div class="input-group">
-      <label class="lbl">Auth Domain</label>
-      <input class="inp" id="fb-authdomain" placeholder="projem.firebaseapp.com">
-    </div>
-    <div class="input-group">
-      <label class="lbl">Database URL</label>
-      <input class="inp" id="fb-dburl" placeholder="https://projem-default-rtdb.firebasedatabase.app">
-    </div>
-    <div class="input-group">
-      <label class="lbl">Project ID</label>
-      <input class="inp" id="fb-projectid" placeholder="projem-12345">
-    </div>
-
-    <div class="modal-btns">
-      <button class="bcancel" onclick="skipFirebase()">Şimdilik Atla (Demo Mod)</button>
-      <button class="btn" style="flex:1" onclick="saveFirebase()">Bağlan →</button>
-    </div>
-  </div>
+<div class="modal">
+<h2>🔥 Firebase Kurulumu</h2>
+<p>Gerçek zamanlı senkronizasyon için Firebase config bilgilerini gir. Sadece bir kere yapman yeterli, tarayıcıya kaydedilir.</p>
+<div class="step"><div class="snum">1</div><div class="stxt"><a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> adresine git → <strong>Proje oluştur</strong></div></div>
+<div class="step"><div class="snum">2</div><div class="stxt">Sol menü → <strong>Build → Realtime Database</strong> → <strong>Create database</strong> → <strong>Test mode</strong> seç</div></div>
+<div class="step"><div class="snum">3</div><div class="stxt">Proje ayarları (⚙️) → <strong>General</strong> → Web uygulaması ekle → <strong>firebaseConfig</strong> kopyala</div></div>
+<p style="margin-top:1rem;">Config nesnesindeki değerleri aşağıya gir:</p>
+<div class="input-group">
+<label class="lbl">API Key</label>
+<input class="inp" id="fb-apikey" placeholder="AIzaSy...">
+</div>
+<div class="input-group">
+<label class="lbl">Auth Domain</label>
+<input class="inp" id="fb-authdomain" placeholder="projem.firebaseapp.com">
+</div>
+<div class="input-group">
+<label class="lbl">Database URL</label>
+<input class="inp" id="fb-dburl" placeholder="https://projem-default-rtdb.firebasedatabase.app">
+</div>
+<div class="input-group">
+<label class="lbl">Project ID</label>
+<input class="inp" id="fb-projectid" placeholder="projem-12345">
+</div>
+<div class="modal-btns">
+<button class="bcancel" onclick="skipFirebase()">Şimdilik Atla (Demo Mod)</button>
+<button class="btn" style="flex:1" onclick="saveFirebase()">Bağlan →</button>
+</div>
+</div>
 </div>
 
 <!-- ═══ LOBBY ═══ -->
 <div id="lobby" class="scr on">
-  <div class="logo">SeTaFlix</div>
-  <div class="sub">Arkadaşınla aynı anda, senkronize izle</div>
-
-  <div class="card">
-    <div class="tabs">
-      <button class="tab on" onclick="ltab('create')">Oda Oluştur</button>
-      <button class="tab" onclick="ltab('join')">Katıl</button>
-    </div>
-
-    <div id="p-create" class="panel on">
-      <label class="lbl">Kullanıcı Adın</label>
-      <input class="inp" id="cn" placeholder="Sena veya Taner..." maxlength="20">
-      <label class="lbl">Oda Adı (opsiyonel)</label>
-      <input class="inp" id="rn" placeholder="Film gecesi 🎬" maxlength="30">
-      <button class="btn" onclick="createRoom()">Oda Oluştur →</button>
-    </div>
-
-    <div id="p-join" class="panel">
-      <label class="lbl">Kullanıcı Adın</label>
-      <input class="inp" id="jn" placeholder="Sena veya Taner..." maxlength="20">
-      <label class="lbl">Oda Kodu</label>
-      <input class="inp" id="rc" placeholder="örn. ABC123" maxlength="8" style="text-transform:uppercase;letter-spacing:0.1em">
-      <button class="btn" onclick="joinRoom()">Odaya Katıl →</button>
-    </div>
-  </div>
-
-  <div class="feats">
-    <div class="feat"><div class="fdot"></div>YouTube</div>
-    <div class="feat"><div class="fdot"></div>m3u8 / MP4</div>
-    <div class="feat"><div class="fdot"></div>Gerçek zamanlı sync</div>
-    <div class="feat"><div class="fdot"></div>Sohbet</div>
-    <div class="feat"><div class="fdot"></div>Telefon uyumlu</div>
-  </div>
-
-  <button style="margin-top:1.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="document.getElementById('fb-modal').classList.remove('hidden')">⚙️ Firebase Ayarları</button>
-  <button style="margin-top:0.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="setProxyBase()">🔧 Proxy URL</button>
+<div class="logo">SeTaFlix</div>
+<div class="sub">Arkadaşınla aynı anda, senkronize izle</div>
+<div class="card">
+<div class="tabs">
+<button class="tab on" onclick="ltab('create')">Oda Oluştur</button>
+<button class="tab" onclick="ltab('join')">Katıl</button>
+</div>
+<div id="p-create" class="panel on">
+<label class="lbl">Kullanıcı Adın</label>
+<input class="inp" id="cn" placeholder="Sena veya Taner..." maxlength="20">
+<label class="lbl">Oda Adı (opsiyonel)</label>
+<input class="inp" id="rn" placeholder="Film gecesi 🎬" maxlength="30">
+<button class="btn" onclick="createRoom()">Oda Oluştur →</button>
+</div>
+<div id="p-join" class="panel">
+<label class="lbl">Kullanıcı Adın</label>
+<input class="inp" id="jn" placeholder="Sena veya Taner..." maxlength="20">
+<label class="lbl">Oda Kodu</label>
+<input class="inp" id="rc" placeholder="örn. ABC123" maxlength="8" style="text-transform:uppercase;letter-spacing:0.1em">
+<button class="btn" onclick="joinRoom()">Odaya Katıl →</button>
+</div>
+</div>
+<div class="feats">
+<div class="feat"><div class="fdot"></div>YouTube</div>
+<div class="feat"><div class="fdot"></div>m3u8 / MP4</div>
+<div class="feat"><div class="fdot"></div>Gerçek zamanlı sync</div>
+<div class="feat"><div class="fdot"></div>Sohbet</div>
+<div class="feat"><div class="fdot"></div>Telefon uyumlu</div>
+</div>
+<button style="margin-top:1.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="document.getElementById('fb-modal').classList.remove('hidden')">⚙️ Firebase Ayarları</button>
+<button style="margin-top:0.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="setProxyBase()">🔧 Proxy URL</button>
 </div>
 
 <!-- ═══ ROOM ═══ -->
 <div id="room" class="scr">
-  <div class="rhead">
-    <div class="rlogo">SeTaFlix</div>
-    <div class="rid" onclick="copyCode()" title="Kodu kopyala">
-      <span style="color:var(--txt3);font-size:0.72rem;">ODA</span>
-      <strong id="dcode">------</strong>
-      <span>⎘</span>
-    </div>
-    <div class="vcnt">
-      <div class="ldot"></div>
-      <span id="vcnt-txt">1</span>
-    </div>
-    <button class="bleave" onclick="leaveRoom()">Çık</button>
-  </div>
-
-  <div class="rbody">
-    <!-- VIDEO AREA -->
-    <div class="varea">
-      <div class="vwrap">
-        <div id="vcont">
-          <div class="vph" id="vph">
-            <div class="vph-icon">▶</div>
-            <p>Video bekleniyor</p>
-            <small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small>
-          </div>
-        </div>
-      </div>
-
-      <div class="syncbar hidden" id="syncbar">
-        <div class="sync-dot"></div>
-        <span id="sync-txt">Sync aktif</span>
-      </div>
-
-      <div class="vctl">
-        <div class="srctabs">
-          <button class="stab on" id="t-yt" onclick="srcMode('youtube')">YouTube</button>
-          <button class="stab" id="t-url" onclick="srcMode('url')">URL / m3u8</button>
-        </div>
-        <div class="vinrow">
-          <input id="vurl" placeholder="YouTube linki veya video URL'si...">
-          <button class="bsm" onclick="loadVideo()">Yükle</button>
-        </div>
-        <button class="bsm ol" onclick="syncNow()" title="Herkesi sync et">⟳ Sync</button>
-      </div>
-
-      <!-- SUBTITLE BAR -->
-      <div class="subbar">
-        <span class="sub-label">💬 Altyazı:</span>
-        <input id="suburl" placeholder="Altyazı linki (subtitle-tur-1.vtt)">
-        <button class="bsm" onclick="loadSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Ekle</button>
-        <button class="bsm ol" onclick="removeSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Kaldır</button>
-        <span class="sub-active" id="sub-status"></span>
-      </div>
-    </div>
-
-    <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-      <div class="stabs">
-        <button class="stab2 on" id="st-chat" onclick="swtab('chat')">Sohbet</button>
-        <button class="stab2" id="st-mem" onclick="swtab('members')">Üyeler</button>
-      </div>
-
-      <div class="spanel on" id="sp-chat">
-        <div class="msgs" id="msgs"></div>
-        <div class="reacts">
-          <button class="rb" onclick="react('😂')">😂</button>
-          <button class="rb" onclick="react('😮')">😮</button>
-          <button class="rb" onclick="react('❤️')">❤️</button>
-          <button class="rb" onclick="react('👏')">👏</button>
-          <button class="rb" onclick="react('🔥')">🔥</button>
-          <button class="rb" onclick="react('😱')">😱</button>
-        </div>
-        <div class="cinput">
-          <input id="ci" placeholder="Mesaj yaz..." maxlength="200" onkeydown="if(event.key==='Enter')sendMsg()">
-          <button class="bsend" onclick="sendMsg()">↑</button>
-        </div>
-      </div>
-
-      <div class="spanel" id="sp-mem">
-        <div class="mlist" id="mlist"></div>
-      </div>
-    </div>
-  </div>
+<div class="rhead">
+<div class="rlogo">SeTaFlix</div>
+<div class="rid" onclick="copyCode()" title="Kodu kopyala">
+<span style="color:var(--txt3);font-size:0.72rem;">ODA</span>
+<strong id="dcode">------</strong>
+<span>⎘</span>
+</div>
+<div class="vcnt">
+<div class="ldot"></div>
+<span id="vcnt-txt">1</span>
+</div>
+<button class="bleave" onclick="leaveRoom()">Çık</button>
+</div>
+<div class="rbody">
+<!-- VIDEO AREA -->
+<div class="varea">
+<div class="vwrap">
+<div id="vcont">
+<div class="vph" id="vph">
+<div class="vph-icon">▶</div>
+<p>Video bekleniyor</p>
+<small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small>
+</div>
+</div>
+</div>
+<div class="syncbar hidden" id="syncbar">
+<div class="sync-dot"></div>
+<span id="sync-txt">Sync aktif</span>
+</div>
+<div class="vctl">
+<div class="srctabs">
+<button class="stab on" id="t-yt" onclick="srcMode('youtube')">YouTube</button>
+<button class="stab" id="t-url" onclick="srcMode('url')">URL / m3u8</button>
+</div>
+<div class="vinrow">
+<input id="vurl" placeholder="YouTube linki veya video URL'si...">
+<button class="bsm" onclick="loadVideo()">Yükle</button>
+</div>
+<button class="bsm ol" onclick="syncNow()" title="Herkesi sync et">⟳ Sync</button>
+</div>
+<!-- SUBTITLE BAR -->
+<div class="subbar">
+<span class="sub-label">💬 Altyazı:</span>
+<input id="suburl" placeholder="Altyazı linki (subtitle-tur-1.vtt)">
+<button class="bsm" onclick="loadSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Ekle</button>
+<button class="bsm ol" onclick="removeSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Kaldır</button>
+<span class="sub-active" id="sub-status"></span>
+</div>
+</div>
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+<div class="stabs">
+<button class="stab2 on" id="st-chat" onclick="swtab('chat')">Sohbet</button>
+<button class="stab2" id="st-mem" onclick="swtab('members')">Üyeler</button>
+</div>
+<div class="spanel on" id="sp-chat">
+<div class="msgs" id="msgs"></div>
+<div class="reacts">
+<button class="rb" onclick="react('😂')">😂</button>
+<button class="rb" onclick="react('😮')">😮</button>
+<button class="rb" onclick="react('❤️')">❤️</button>
+<button class="rb" onclick="react('👏')">👏</button>
+<button class="rb" onclick="react('🔥')">🔥</button>
+<button class="rb" onclick="react('😱')">😱</button>
+</div>
+<div class="cinput">
+<input id="ci" placeholder="Mesaj yaz..." maxlength="200" onkeydown="if(event.key==='Enter')sendMsg()">
+<button class="bsend" onclick="sendMsg()">↑</button>
+</div>
+</div>
+<div class="spanel" id="sp-mem">
+<div class="mlist" id="mlist"></div>
+</div>
+</div>
+</div>
 </div>
 
 <!-- MOBILE SIDEBAR TOGGLE -->
@@ -593,7 +555,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 
 <script>
 // ══════════════════════════════════════
-//  STATE
+// STATE
 // ══════════════════════════════════════
 const S = {
   user: '', room: '', isHost: false,
@@ -605,13 +567,16 @@ const S = {
   _autoloadPending: null,
   _directLoad: false,
   _audioUrl: null,
-  _subtitleUrl: null
+  _subtitleUrl: null,
+  _audioHls: null,
+  _audioEl: null,
+  _audioSync: null
 };
 
 const COLORS = ['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
 
 // ══════════════════════════════════════
-//  FIREBASE CONFIG — SeTaFlix
+// FIREBASE CONFIG — SeTaFlix
 // ══════════════════════════════════════
 const SETAFLIX_CONFIG = {
   apiKey: "AIzaSyCbK26N5Nflnbm5266Ik3y5IWuYnlFlvig",
@@ -622,7 +587,7 @@ const SETAFLIX_CONFIG = {
 };
 
 // ══════════════════════════════════════
-//  FIREBASE INIT
+// FIREBASE INIT
 // ══════════════════════════════════════
 function initFirebase(cfg){
   try {
@@ -672,25 +637,21 @@ function tryInitFirebase(attempts){
 window.addEventListener('load', ()=> tryInitFirebase(10));
 
 // ══════════════════════════════════════
-//  AUTOLOAD — Chrome eklentisinden gelen ?autoload= parametresi
+// AUTOLOAD — Chrome eklentisinden gelen ?autoload= parametresi
 // ══════════════════════════════════════
 function checkAutoload(){
   const params = new URLSearchParams(window.location.search);
   const autoload = params.get('autoload');
   if(!autoload) return;
-
   S._directLoad  = params.get('direct') === '1';
   S._audioUrl    = params.get('audio')    ? decodeURIComponent(params.get('audio'))    : null;
   S._subtitleUrl = params.get('subtitle') ? decodeURIComponent(params.get('subtitle')) : null;
-
   window.history.replaceState({}, '', window.location.pathname);
-
   function doLoad(){
     document.getElementById('vurl').value = decodeURIComponent(autoload);
     srcMode('url');
     loadVideo();
   }
-
   if(document.getElementById('room').classList.contains('on')){
     doLoad();
   } else {
@@ -700,7 +661,7 @@ function checkAutoload(){
 window.addEventListener('load', checkAutoload);
 
 // ══════════════════════════════════════
-//  LOBBY
+// LOBBY
 // ══════════════════════════════════════
 function ltab(t){
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',(i===0&&t==='create')||(i===1&&t==='join')));
@@ -710,9 +671,7 @@ function ltab(t){
 
 function createRoom(){
   const name = v('cn')||'Misafir';
-  S.user = name;
-  S.room = genCode();
-  S.isHost = true;
+  S.user = name; S.room = genCode(); S.isHost = true;
   enterRoom();
   if(S.fbReady) fbJoin();
   sysmsg('Oda oluşturuldu: ' + S.room);
@@ -724,9 +683,7 @@ function joinRoom(){
   const name = v('jn')||'Misafir';
   const code = v('rc').toUpperCase();
   if(!code){ toast('Oda kodu gir!'); return; }
-  S.user = name;
-  S.room = code;
-  S.isHost = false;
+  S.user = name; S.room = code; S.isHost = false;
   enterRoom();
   if(S.fbReady) fbJoin();
   sysmsg(name + ' odaya katıldı.');
@@ -734,8 +691,7 @@ function joinRoom(){
 }
 
 function enterRoom(){
-  show('room');
-  hide('lobby');
+  show('room'); hide('lobby');
   document.getElementById('dcode').textContent = S.room;
   addMember(S.myId, S.user, S.isHost);
   renderMembers();
@@ -749,41 +705,33 @@ function enterRoom(){
 }
 
 // ══════════════════════════════════════
-//  FIREBASE ROOM LOGIC
+// FIREBASE ROOM LOGIC
 // ══════════════════════════════════════
 function fbJoin(){
   const ref = S.db.ref('rooms/' + S.room);
-
   ref.child('members/' + S.myId).set({
     name: S.user, host: S.isHost,
     color: COLORS[Object.keys(S.members).length % COLORS.length],
     ts: Date.now()
   });
-
   ref.child('members/' + S.myId).onDisconnect().remove();
-
   ref.child('members').on('value', snap => {
     const data = snap.val() || {};
     S.members = {};
-    Object.entries(data).forEach(([id,m])=>{
-      addMember(id, m.name, m.host, m.color);
-    });
+    Object.entries(data).forEach(([id,m])=>{ addMember(id, m.name, m.host, m.color); });
     renderMembers();
     document.getElementById('vcnt-txt').textContent = Object.keys(S.members).length + ' kişi';
   });
-
   ref.child('chat').limitToLast(50).on('child_added', snap => {
     const d = snap.val();
     if(d.uid === S.myId) return;
     addMsgEl(d.name, d.text, false, d.sys, d.color);
   });
-
   ref.child('sync').on('value', snap => {
     const d = snap.val();
     if(!d || d.uid === S.myId) return;
     applySyncCmd(d);
   });
-
   ref.child('react').limitToLast(10).on('child_added', snap => {
     const d = snap.val();
     if(d.uid === S.myId) return;
@@ -801,28 +749,20 @@ function fbChat(text, sys=false){
 
 function fbSync(cmd){
   if(!S.fbReady) return;
-  S.db.ref('rooms/' + S.room + '/sync').set({
-    uid: S.myId, ...cmd, ts: Date.now()
-  });
+  S.db.ref('rooms/' + S.room + '/sync').set({ uid: S.myId, ...cmd, ts: Date.now() });
 }
 
 function fbReact(emoji){
   if(!S.fbReady) return;
-  S.db.ref('rooms/' + S.room + '/react').push({
-    uid: S.myId, emoji, ts: Date.now()
-  });
+  S.db.ref('rooms/' + S.room + '/react').push({ uid: S.myId, emoji, ts: Date.now() });
 }
 
 // ══════════════════════════════════════
-//  SYNC LOGIC
+// SYNC LOGIC
 // ══════════════════════════════════════
 function applySyncCmd(d){
   const vid = document.querySelector('#vcont video');
-
-  if(d.cmd === 'load'){
-    loadVideoUrl(d.url, d.type, false);
-    showSyncBar(d.name ? d.name + ' video yükledi' : 'Video sync edildi');
-  }
+  if(d.cmd === 'load'){ loadVideoUrl(d.url, d.type, false); showSyncBar(d.name ? d.name + ' video yükledi' : 'Video sync edildi'); }
   if(d.cmd === 'play' && vid){ vid.play(); showSyncBar('Oynatma sync edildi'); }
   if(d.cmd === 'pause' && vid){ vid.pause(); showSyncBar('Durdurma sync edildi'); }
   if(d.cmd === 'seek' && vid){ vid.currentTime = d.t; showSyncBar('Konum sync edildi'); }
@@ -835,12 +775,8 @@ function applySyncCmd(d){
 
 function syncNow(){
   const vid = document.querySelector('#vcont video');
-  if(vid){
-    fbSync({ cmd:'seek', t: vid.currentTime });
-    toast('Sync gönderildi →');
-  } else {
-    toast('Önce video yükle');
-  }
+  if(vid){ fbSync({ cmd:'seek', t: vid.currentTime }); toast('Sync gönderildi →'); }
+  else { toast('Önce video yükle'); }
 }
 
 function showSyncBar(txt){
@@ -852,7 +788,7 @@ function showSyncBar(txt){
 }
 
 // ══════════════════════════════════════
-//  VIDEO — YouTube + m3u8 + mp4
+// VIDEO — YouTube + m3u8 + mp4
 // ══════════════════════════════════════
 function srcMode(m){
   S.mode = m;
@@ -869,10 +805,52 @@ function loadVideo(){
 }
 
 function destroyHls(){
-  if(S.hls){
-    S.hls.destroy();
-    S.hls = null;
-  }
+  if(S.hls){ S.hls.destroy(); S.hls = null; }
+  stopExternalAudio();
+}
+
+function stopExternalAudio(){
+  if(S._audioHls){ S._audioHls.destroy(); S._audioHls = null; }
+  if(S._audioEl){ S._audioEl.pause(); S._audioEl.remove(); S._audioEl = null; }
+  if(S._audioSync){ clearInterval(S._audioSync); S._audioSync = null; }
+}
+
+function startExternalAudio(audioUrl, video){
+  stopExternalAudio();
+  const audio = document.createElement('audio');
+  audio.style.display = 'none';
+  document.body.appendChild(audio);
+  S._audioEl = audio;
+
+  const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
+  const proxyUrl = savedBase + '/proxy?key=setaflix2026&url=';
+  const finalAudioUrl = (audioUrl.includes('trycloudflare.com') || audioUrl.includes('onrender.com'))
+    ? audioUrl : proxyUrl + encodeURIComponent(audioUrl);
+
+  const audioHls = new Hls({ maxBufferLength: 30, enableWorker: true });
+  audioHls.loadSource(finalAudioUrl);
+  audioHls.attachMedia(audio);
+  audioHls.on(Hls.Events.MANIFEST_PARSED, () => {
+    audio.volume = 1;
+    audio.currentTime = video.currentTime;
+    if(!video.paused) audio.play().catch(()=>{});
+  });
+  S._audioHls = audioHls;
+
+  // Video sesini kapat, dış ses aktif
+  video.muted = true;
+
+  // Video olaylarına ses bağla
+  video.addEventListener('play',  () => audio.play().catch(()=>{}));
+  video.addEventListener('pause', () => audio.pause());
+  video.addEventListener('seeked', () => { audio.currentTime = video.currentTime; });
+
+  // Her 3 saniyede drift kontrolü
+  S._audioSync = setInterval(() => {
+    if(!video.paused && Math.abs(audio.currentTime - video.currentTime) > 0.5){
+      audio.currentTime = video.currentTime;
+    }
+  }, 3000);
 }
 
 function isM3u8(url){
@@ -881,7 +859,6 @@ function isM3u8(url){
 
 function loadVideoUrl(raw, mode, broadcast){
   const cont = document.getElementById('vcont');
-
   destroyHls();
 
   // ─── YouTube ───
@@ -906,29 +883,29 @@ function loadVideoUrl(raw, mode, broadcast){
 
     if(Hls.isSupported()){
       const hls = new Hls({
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        enableWorker: true,
-        lowLatencyMode: false
+        maxBufferLength: 30, maxMaxBufferLength: 60,
+        enableWorker: true, lowLatencyMode: false
       });
-
       const cookieParam = S.pendingCookies ? '&cookies=' + encodeURIComponent(S.pendingCookies) : '';
       S.pendingCookies = null;
-
       const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
       const proxyUrl = savedBase + '/proxy?key=setaflix2026' + cookieParam + '&url=';
-      const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com') || S._directLoad) ? raw : proxyUrl + encodeURIComponent(raw);
+      const finalUrl = (raw.includes('trycloudflare.com') || raw.includes('onrender.com') || S._directLoad)
+        ? raw : proxyUrl + encodeURIComponent(raw);
       S._directLoad = false;
 
       hls.loadSource(finalUrl);
       hls.attachMedia(video);
+
       hls.on(Hls.Events.MANIFEST_PARSED, function(){
-      console.log('TRACKS:', JSON.stringify(hls.audioTracks));
-  console.log('AUDIO_URL:', S._audioUrl);
-        // Ses track seçimi
-        if (S._audioUrl) {
+        // Tip 1: HLS içinde gömülü ses track varsa direkt seç
+        if (S._audioUrl && hls.audioTracks.length > 0) {
           const trackIdx = hls.audioTracks.findIndex(t => t.url === S._audioUrl);
-          if (trackIdx !== -1) hls.audioTrack = trackIdx;
+          if (trackIdx !== -1) { hls.audioTrack = trackIdx; S._audioUrl = null; }
+        }
+        // Tip 2: Ayrı ses stream'i — video mute et, dış audio başlat
+        if (S._audioUrl) {
+          startExternalAudio(S._audioUrl, video);
           S._audioUrl = null;
         }
         // Altyazı otomatik yükle
@@ -939,6 +916,7 @@ function loadVideoUrl(raw, mode, broadcast){
         }
         video.play().catch(()=>{});
       });
+
       hls.on(Hls.Events.ERROR, function(event, data){
         if(data.fatal){
           console.error('HLS fatal error:', data);
@@ -955,6 +933,7 @@ function loadVideoUrl(raw, mode, broadcast){
         }
       });
       S.hls = hls;
+
     } else if(video.canPlayType('application/vnd.apple.mpegurl')){
       video.src = raw;
       video.addEventListener('loadedmetadata', ()=> video.play().catch(()=>{}));
@@ -1010,18 +989,15 @@ function ytId(url){
 }
 
 // ══════════════════════════════════════
-//  SUBTITLE (ALTYAZI)
+// SUBTITLE (ALTYAZI)
 // ══════════════════════════════════════
 function loadSubtitle(){
   const url = v('suburl');
   if(!url){ toast('Altyazı URL gir!'); return; }
-
   const video = document.querySelector('#vcont video');
   if(!video){ toast('Önce video yükle!'); return; }
-
   const oldTracks = video.querySelectorAll('track');
   oldTracks.forEach(t => t.remove());
-
   const track = document.createElement('track');
   track.kind = 'subtitles';
   track.label = url.includes('tur') ? 'Türkçe' : url.includes('eng') ? 'English' : 'Altyazı';
@@ -1029,20 +1005,15 @@ function loadSubtitle(){
   track.src = url;
   track.default = true;
   video.appendChild(track);
-
   track.addEventListener('load', function(){
-    if(video.textTracks.length > 0){
-      video.textTracks[0].mode = 'showing';
-    }
+    if(video.textTracks.length > 0){ video.textTracks[0].mode = 'showing'; }
     document.getElementById('sub-status').textContent = '✓ Altyazı aktif';
     toast('Altyazı yüklendi!');
   });
-
   track.addEventListener('error', function(){
     document.getElementById('sub-status').textContent = '';
     toast('Altyazı yüklenemedi — URL kontrol et');
   });
-
   setTimeout(()=>{
     if(video.textTracks.length > 0){
       video.textTracks[0].mode = 'showing';
@@ -1050,7 +1021,6 @@ function loadSubtitle(){
       toast('Altyazı yüklendi!');
     }
   }, 500);
-
   if(S.fbReady){
     fbSync({ cmd:'subtitle', url: url, name: S.user });
     fbChat(S.user + ' altyazı ekledi.', true);
@@ -1060,21 +1030,16 @@ function loadSubtitle(){
 function removeSubtitle(){
   const video = document.querySelector('#vcont video');
   if(!video){ toast('Video yok!'); return; }
-
   const tracks = video.querySelectorAll('track');
   tracks.forEach(t => t.remove());
-
-  for(let i = 0; i < video.textTracks.length; i++){
-    video.textTracks[i].mode = 'disabled';
-  }
-
+  for(let i = 0; i < video.textTracks.length; i++){ video.textTracks[i].mode = 'disabled'; }
   document.getElementById('sub-status').textContent = '';
   document.getElementById('suburl').value = '';
   toast('Altyazı kaldırıldı');
 }
 
 // ══════════════════════════════════════
-//  CHAT
+// CHAT
 // ══════════════════════════════════════
 function sendMsg(){
   const inp = document.getElementById('ci');
@@ -1106,35 +1071,26 @@ function addMsgEl(name, text, own=false, sys=false, color=''){
 }
 
 // ══════════════════════════════════════
-//  REACTIONS
+// REACTIONS
 // ══════════════════════════════════════
-function react(emoji){
-  floatReact(emoji);
-  fbReact(emoji);
-}
-
+function react(emoji){ floatReact(emoji); fbReact(emoji); }
 function floatReact(emoji){
   const c = document.getElementById('frcts');
   const el = document.createElement('div');
-  el.className='fr';
-  el.textContent=emoji;
+  el.className='fr'; el.textContent=emoji;
   el.style.left=(10+Math.random()*60)+'px';
   c.appendChild(el);
   setTimeout(()=>el.remove(),2100);
 }
 
 // ══════════════════════════════════════
-//  MEMBERS
+// MEMBERS
 // ══════════════════════════════════════
 function addMember(id, name, isHost, color){
   if(!color) color = COLORS[Object.keys(S.members).length % COLORS.length];
   S.members[id] = { name, isHost, color };
 }
-
-function memberColor(id){
-  return S.members[id]?.color || '#a78bfa';
-}
-
+function memberColor(id){ return S.members[id]?.color || '#a78bfa'; }
 function renderMembers(){
   const list = document.getElementById('mlist');
   list.innerHTML='';
@@ -1156,15 +1112,12 @@ function renderMembers(){
 }
 
 // ══════════════════════════════════════
-//  ROOM CONTROLS
+// ROOM CONTROLS
 // ══════════════════════════════════════
 function leaveRoom(){
   destroyHls();
-  if(S.fbReady && S.db){
-    S.db.ref('rooms/' + S.room + '/members/' + S.myId).remove();
-  }
-  hide('room');
-  show('lobby');
+  if(S.fbReady && S.db){ S.db.ref('rooms/' + S.room + '/members/' + S.myId).remove(); }
+  hide('room'); show('lobby');
   document.getElementById('vcont').innerHTML=`<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>`;
   document.getElementById('msgs').innerHTML='';
   S.members={};
@@ -1189,7 +1142,7 @@ function toggleMobSidebar(){
 }
 
 // ══════════════════════════════════════
-//  UTILS
+// UTILS
 // ══════════════════════════════════════
 function setProxyBase(){
   const current = localStorage.getItem('sf_proxy_base') || '';
@@ -1226,6 +1179,5 @@ document.addEventListener('keydown', e=>{
   }
 });
 </script>
-
 </body>
 </html>
