@@ -473,7 +473,7 @@ function loadVideoUrl(raw,mode,broadcast){
     } else {
       cont.innerHTML=`<div class="vph" style="height:100%;padding:2rem"><div class="vph-icon">✕</div><p>Bu tarayıcı m3u8 desteklemiyor</p></div>`;return;
     }
-    fbSync({cmd:'load',url:raw,type:'url',name:S.user,audioUrl:pendAudio||null,direct:isDir});fbChat(S.user+' bir dizi/film başlattı.',true);toast('m3u8 video yüklendi!');}
+    if(broadcast){fbSync({cmd:'load',url:raw,type:'url',name:S.user,audioUrl:pendAudio||null,direct:isDir});fbChat(S.user+' bir dizi/film başlattı.',true);toast('m3u8 video yüklendi!');}
     return;
   }
   // mp4
