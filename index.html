@@ -482,7 +482,8 @@ function pReset(){
   document.getElementById('prog-fill').style.width='0%';
   document.getElementById('prog-buf').style.width='0%';
   document.getElementById('time-txt').textContent='0:00 / 0:00';
-  document.getElementById('ico-play').setAttribute('d','M8 5v14l11-7z');
+  document.getElementById('ico-play').style.display='';
+document.getElementById('ico-pause').style.display='none';
   _spdIdx=2;document.getElementById('spd-btn').textContent='1×';
   if(_raf){cancelAnimationFrame(_raf);_raf=null;}
   document.getElementById('player').classList.remove('visible');
@@ -520,7 +521,8 @@ function pBind(video){
   // play/pause/seek sync
   video.addEventListener('play',()=>{document.getElementById('ico-play').style.display='none';
 document.getElementById('ico-pause').style.display='';fbSync({cmd:'play'});});
-  video.addEventListener('pause',()=>{document.getElementById('ico-play').setAttribute('d','M8 5v14l11-7z');fbSync({cmd:'pause'});});
+  video.addEventListener('pause',()=>{document.getElementById('ico-play').style.display='';
+document.getElementById('ico-pause').style.display='none';fbSync({cmd:'pause'});});
   let _st=0;
   video.addEventListener('seeked',()=>{const n=Date.now();if(n-_st>1500){_st=n;fbSync({cmd:'seek',t:video.currentTime});}});
 }
