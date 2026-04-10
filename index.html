@@ -619,7 +619,10 @@ function loadSubtitle(){
   track.kind='subtitles';
   track.label=url.includes('tur')?'Türkçe':url.includes('eng')?'English':'Altyazı';
   track.srclang=url.includes('tur')?'tr':url.includes('eng')?'en':'tr';
-  track.src=url;track.default=true;
+  const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
+const proxyUrl = savedBase + '/proxy?key=setaflix2026&url=';
+const isDirectSub = url.includes('trycloudflare.com') || url.includes('onrender.com');
+track.src = isDirectSub ? url : proxyUrl + encodeURIComponent(url);track.default=true;
   video.appendChild(track);
   track.addEventListener('load',()=>{if(video.textTracks.length>0)video.textTracks[0].mode='showing';document.getElementById('sub-status').textContent='✓ Altyazı aktif';toast('Altyazı yüklendi!');});
   track.addEventListener('error',()=>{document.getElementById('sub-status').textContent='';toast('Altyazı yüklenemedi');});
