@@ -354,10 +354,10 @@ window.addEventListener('load',()=>tryInitFB(10));
 // ── AUTOLOAD ──
 function checkAutoload(){
   const p=new URLSearchParams(window.location.search),al=p.get('autoload');
-  if(!al)return;
-  S._directLoad=p.get('direct')==='1';
-  S._audioUrl=p.get('audio')?decodeURIComponent(p.get('audio')):null;
-  S._subtitleUrl=p.get('subtitle')?decodeURIComponent(p.get('subtitle')):null;
+  if(!al)return;S._directLoad=p.get('direct')==='1';
+S._audioUrl=p.get('audio')?decodeURIComponent(p.get('audio')):null;
+S._subtitleUrl=p.get('subtitle')?decodeURIComponent(p.get('subtitle')):null;
+S.pendingCookies=p.get('cookies')?decodeURIComponent(p.get('cookies')):null;
   window.history.replaceState({},'',window.location.pathname);
   const doLoad=()=>{document.getElementById('vurl').value=decodeURIComponent(al);srcMode('url');loadVideo();};
   if(document.getElementById('room').classList.contains('on'))doLoad();
