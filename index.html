@@ -52,6 +52,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.4)}}
 .bleave{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);color:var(--err);padding:0.35rem 0.7rem;border-radius:8px;font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:all 0.2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
 .bleave:hover{background:rgba(248,113,113,0.2);}
+/* Host kontrol butonu */
+.bhost{background:rgba(108,71,255,0.1);border:1px solid rgba(108,71,255,0.25);color:var(--acc2);padding:0.35rem 0.7rem;border-radius:8px;font-size:0.72rem;cursor:pointer;white-space:nowrap;transition:all 0.2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.bhost:hover{background:rgba(108,71,255,0.2);}
+.bhost.locked{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.25);color:var(--err);}
 .rbody{display:flex;flex:1;overflow:hidden;min-height:0;}
 .varea{flex:1;display:flex;flex-direction:column;background:#080810;min-width:0;overflow:hidden;}
 .vwrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000;min-height:0;overflow:hidden;cursor:pointer;}
@@ -65,6 +69,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 /* ─── CUSTOM PLAYER ─── */
 #player{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.88));padding:0.5rem 0.9rem 0.65rem;opacity:0;transition:opacity 0.25s;pointer-events:none;}
 #player.visible{opacity:1;pointer-events:all;}
+#player.ctrl-locked .cbtn,#player.ctrl-locked .prog-wrap,#player.ctrl-locked .spd-btn{opacity:0.35;cursor:not-allowed;pointer-events:none;}
 .prog-wrap{position:relative;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;cursor:pointer;margin-bottom:0.6rem;transition:height 0.15s;}
 .prog-wrap:hover{height:6px;}
 .prog-buf{position:absolute;top:0;left:0;height:100%;background:rgba(255,255,255,0.15);border-radius:2px;pointer-events:none;}
@@ -128,6 +133,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 .mname{font-size:0.85rem;font-weight:500;}.mrole{font-size:0.7rem;color:var(--txt3);}
 .hbadge{margin-left:auto;font-size:0.65rem;background:rgba(108,71,255,0.15);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(108,71,255,0.2);}
 .oonline{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0;}
+/* Üye satırında izin butonu */
+.mperm{margin-left:auto;font-size:0.65rem;background:transparent;border:1px solid var(--brd);color:var(--txt3);padding:2px 7px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.mperm:hover{border-color:var(--acc);color:var(--acc2);}
+.mperm.on{background:rgba(34,211,160,0.1);border-color:rgba(34,211,160,0.3);color:var(--ok);}
 .msgs{flex:1;overflow-y:auto;padding:0.6rem;display:flex;flex-direction:column;gap:5px;}
 .msg{display:flex;flex-direction:column;gap:2px;padding:0.45rem 0.55rem;border-radius:8px;background:var(--s2);animation:msgIn 0.2s ease;}
 @keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
@@ -222,6 +231,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
 <div class="rlogo">SeTaFlix</div>
 <div class="rid" onclick="copyCode()"><span style="color:var(--txt3);font-size:0.72rem;">ODA</span><strong id="dcode">------</strong><span>⎘</span></div>
 <div class="vcnt"><div class="ldot"></div><span id="vcnt-txt">1</span></div>
+<!-- Host kontrol butonu — sadece host görür -->
+<button class="bhost" id="btn-hostctrl" style="display:none" onclick="toggleHostControl()">🔓 Serbest</button>
 <button class="bleave" onclick="leaveRoom()">Çık</button>
 </div>
 <div class="rbody">
@@ -240,7 +251,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font
   <div class="ctrl-row">
     <button class="cbtn" id="btn-play" onclick="pPlay()">
     <svg id="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-<svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    <svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
     </button>
     <button class="cbtn" onclick="pSeek(-10)" title="-10s">
       <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
@@ -322,7 +333,12 @@ const S={
   myId:'u_'+Math.random().toString(36).substr(2,8),
   db:null,hls:null,pendingCookies:null,_autoloadPending:null,
   _directLoad:false,_audioUrl:null,_subtitleUrl:null,
-  _audioHls:null,_audioEl:null,_audioSync:null,_hasExtAudio:false
+  _audioHls:null,_audioEl:null,_audioSync:null,_hasExtAudio:false,
+  // Host kontrol
+  hostCtrlLocked:false,  // true = sadece host kontrol edebilir
+  allowedIds:{},         // hostCtrlLocked=true iken izin verilen üye id'leri
+  // Yeniden bağlanma
+  _reconnectTimer:null
 };
 const SPEEDS=[0.5,0.75,1,1.25,1.5,2]; let _spdIdx=2;
 const COLORS=['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
@@ -353,21 +369,152 @@ window.addEventListener('load',checkAutoload);
 function ltab(t){document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',(i===0&&t==='create')||(i===1&&t==='join')));document.getElementById('p-create').classList.toggle('on',t==='create');document.getElementById('p-join').classList.toggle('on',t==='join');}
 function createRoom(){const name=v('cn')||'Misafir';S.user=name;S.room=genCode();S.isHost=true;enterRoom();if(S.fbReady)fbJoin();sysmsg('Oda oluşturuldu: '+S.room);sysmsg(name+' odaya katıldı.');toast('Oda hazır! Kodu paylaş: '+S.room);}
 function joinRoom(){const name=v('jn')||'Misafir';const code=v('rc').toUpperCase();if(!code){toast('Oda kodu gir!');return;}S.user=name;S.room=code;S.isHost=false;enterRoom();if(S.fbReady)fbJoin();sysmsg(name+' odaya katıldı.');toast('Odaya katıldın!');}
-function enterRoom(){show('room');hide('lobby');document.getElementById('dcode').textContent=S.room;addMember(S.myId,S.user,S.isHost);renderMembers();if(window.innerWidth<=640)document.getElementById('mob-tog').style.display='flex';if(S._autoloadPending){setTimeout(S._autoloadPending,400);S._autoloadPending=null;}}
+function enterRoom(){
+  show('room');hide('lobby');
+  document.getElementById('dcode').textContent=S.room;
+  addMember(S.myId,S.user,S.isHost);
+  renderMembers();
+  if(window.innerWidth<=640)document.getElementById('mob-tog').style.display='flex';
+  // Host kontrolü butonunu göster
+  if(S.isHost)document.getElementById('btn-hostctrl').style.display='';
+  if(S._autoloadPending){setTimeout(S._autoloadPending,400);S._autoloadPending=null;}
+}
 
 // ── FIREBASE ROOM ──
 function fbJoin(){
   const ref=S.db.ref('rooms/'+S.room);
   ref.child('members/'+S.myId).set({name:S.user,host:S.isHost,color:COLORS[Object.keys(S.members).length%COLORS.length],ts:Date.now()});
   ref.child('members/'+S.myId).onDisconnect().remove();
-  ref.child('members').on('value',snap=>{const d=snap.val()||{};S.members={};Object.entries(d).forEach(([id,m])=>addMember(id,m.name,m.host,m.color));renderMembers();document.getElementById('vcnt-txt').textContent=Object.keys(S.members).length+' kişi';});
+
+  ref.child('members').on('value',snap=>{
+    const d=snap.val()||{};
+    const prevCount=Object.keys(S.members).length;
+    S.members={};
+    Object.entries(d).forEach(([id,m])=>addMember(id,m.name,m.host,m.color));
+    renderMembers();
+    document.getElementById('vcnt-txt').textContent=Object.keys(S.members).length+' kişi';
+    // Yeni üye katıldıysa ve ben hostsam → mevcut state'i gönder
+    const newCount=Object.keys(S.members).length;
+    if(S.isHost&&newCount>prevCount&&prevCount>0){
+      const vid=document.querySelector('#vcont video');
+      if(vid&&vid.src){
+        setTimeout(()=>{
+          const newId=Object.keys(d).find(id=>!Object.keys(S.members).includes(id)||true);
+          const newName=Object.values(d).slice(-1)[0]?.name||'Biri';
+          toast(newName+' odaya katıldı — sync gönderiliyor...');
+          fbSync({cmd:'seek',t:vid.currentTime});
+        },2000);
+      }
+    }
+  });
+
   ref.child('chat').limitToLast(50).on('child_added',snap=>{const d=snap.val();if(d.uid===S.myId)return;addMsgEl(d.name,d.text,false,d.sys,d.color);});
   ref.child('sync').on('value',snap=>{const d=snap.val();if(!d||d.uid===S.myId)return;applySyncCmd(d);});
   ref.child('react').limitToLast(10).on('child_added',snap=>{const d=snap.val();if(d.uid===S.myId)return;floatReact(d.emoji);});
+
+  // Host kontrol state'ini dinle
+  ref.child('hostctrl').on('value',snap=>{
+    const d=snap.val();
+    if(!d)return;
+    S.hostCtrlLocked=d.locked||false;
+    S.allowedIds=d.allowed||{};
+    updateCtrlLock();
+  });
+
+  // Odaya katılınca mevcut video state'ini oku
+  ref.child('state').once('value',snap=>{
+    const d=snap.val();
+    if(!d||!d.url)return;
+    if(d.audioUrl)S._audioUrl=d.audioUrl;
+    S._directLoad=false;
+    loadVideoUrl(d.url,d.type||'url',false);
+    // Video yüklendikten sonra doğru konuma atla
+    setTimeout(()=>{
+      const vid=document.querySelector('#vcont video');
+      if(!vid)return;
+      if(d.currentTime&&d.currentTime>2)vid.currentTime=d.currentTime;
+      if(d.playing)vid.play().catch(()=>{});
+      else vid.pause();
+      showSyncBar('Mevcut konuma atlandı: '+fmt(d.currentTime||0));
+    },3500);
+  });
+
+  // Yeniden bağlanma — online/offline takibi
+  S.db.ref('.info/connected').on('value',snap=>{
+    if(snap.val()===true){
+      if(S._reconnectTimer){
+        clearTimeout(S._reconnectTimer);
+        S._reconnectTimer=null;
+        // Yeniden bağlandı — konumu güncelle
+        const vid=document.querySelector('#vcont video');
+        if(vid&&vid.src){
+          ref.child('state').once('value',st=>{
+            const d=st.val();
+            if(d&&d.currentTime){
+              vid.currentTime=d.currentTime;
+              if(d.playing)vid.play().catch(()=>{});
+              showSyncBar('Yeniden bağlandı — konum güncellendi');
+              toast('Bağlantı yenilendi ✓');
+            }
+          });
+        }
+      }
+    } else {
+      // Bağlantı kesildi
+      S._reconnectTimer=setTimeout(()=>{toast('Bağlantı kesildi, yeniden bağlanıyor...');},2000);
+    }
+  });
 }
+
 function fbChat(text,sys=false){if(!S.fbReady)return;S.db.ref('rooms/'+S.room+'/chat').push({uid:S.myId,name:S.user,text,sys,color:memberColor(S.myId),ts:Date.now()});}
 function fbSync(cmd){if(!S.fbReady)return;S.db.ref('rooms/'+S.room+'/sync').set({uid:S.myId,...cmd,ts:Date.now()});}
 function fbReact(emoji){if(!S.fbReady)return;S.db.ref('rooms/'+S.room+'/react').push({uid:S.myId,emoji,ts:Date.now()});}
+
+// Firebase state kaydet (video bilgisi)
+function fbSaveState(url,type,audioUrl,currentTime,playing){
+  if(!S.fbReady)return;
+  S.db.ref('rooms/'+S.room+'/state').set({url,type:type||'url',audioUrl:audioUrl||null,currentTime:currentTime||0,playing:!!playing,ts:Date.now()});
+}
+
+// ── HOST KONTROL ──
+function toggleHostControl(){
+  if(!S.isHost)return;
+  S.hostCtrlLocked=!S.hostCtrlLocked;
+  if(S.fbReady)S.db.ref('rooms/'+S.room+'/hostctrl').set({locked:S.hostCtrlLocked,allowed:S.allowedIds});
+  updateCtrlLock();
+  toast(S.hostCtrlLocked?'Kontrol kilitlendi — sadece sen yönetiyorsun':'Kontrol serbest bırakıldı');
+}
+
+function toggleMemberPerm(memberId,memberName){
+  if(!S.isHost)return;
+  if(S.allowedIds[memberId])delete S.allowedIds[memberId];
+  else S.allowedIds[memberId]=true;
+  if(S.fbReady)S.db.ref('rooms/'+S.room+'/hostctrl').set({locked:S.hostCtrlLocked,allowed:S.allowedIds});
+  renderMembers();
+  toast(S.allowedIds[memberId]?memberName+' kontrol yetkisi aldı':memberName+' yetkisi alındı');
+}
+
+function canControl(){
+  if(S.isHost)return true;
+  if(!S.hostCtrlLocked)return true;
+  return !!S.allowedIds[S.myId];
+}
+
+function updateCtrlLock(){
+  const btn=document.getElementById('btn-hostctrl');
+  if(S.isHost){
+    btn.textContent=S.hostCtrlLocked?'🔒 Kilitli':'🔓 Serbest';
+    btn.classList.toggle('locked',S.hostCtrlLocked);
+  }
+  // Player kontrollerini kilitle/aç
+  const player=document.getElementById('player');
+  if(!canControl()){
+    player.classList.add('ctrl-locked');
+  } else {
+    player.classList.remove('ctrl-locked');
+  }
+  renderMembers();
+}
 
 // ── SYNC ──
 function applySyncCmd(d){
@@ -375,8 +522,9 @@ function applySyncCmd(d){
   if(d.cmd==='load'){if(d.audioUrl)S._audioUrl=d.audioUrl;if(d.subtitleUrl)S._subtitleUrl=d.subtitleUrl;S._directLoad=false;loadVideoUrl(d.url,d.type,false);showSyncBar((d.name||'Birisi')+' video yükledi');}
   if(d.cmd==='play'&&vid){vid.play();showSyncBar('Oynatma sync edildi');}
   if(d.cmd==='pause'&&vid){vid.pause();showSyncBar('Durdurma sync edildi');}
-  if(d.cmd==='seek'&&vid){vid.currentTime=d.t;showSyncBar('Konum sync edildi');}
+  if(d.cmd==='seek'&&vid){vid.currentTime=d.t;showSyncBar('Konum sync edildi → '+fmt(d.t));}
   if(d.cmd==='subtitle'&&d.url){document.getElementById('suburl').value=d.url;loadSubtitle();showSyncBar((d.name||'Birisi')+' altyazı ekledi');}
+  if(d.cmd==='speed'&&vid){vid.playbackRate=d.spd;if(S._audioEl)S._audioEl.playbackRate=d.spd;document.getElementById('spd-btn').textContent=d.spd+'×';showSyncBar('Hız: '+d.spd+'×');}
 }
 function syncNow(){const vid=document.querySelector('#vcont video');if(vid){fbSync({cmd:'seek',t:vid.currentTime});toast('Sync gönderildi →');}else toast('Önce video yükle');}
 function showSyncBar(txt){const bar=document.getElementById('syncbar');bar.classList.remove('hidden');document.getElementById('sync-txt').textContent=txt;clearTimeout(bar._t);bar._t=setTimeout(()=>bar.classList.add('hidden'),3000);}
@@ -422,7 +570,12 @@ function loadVideoUrl(raw,mode,broadcast){
     const vid=ytId(raw);if(!vid){toast('Geçerli YouTube linki gir');return;}
     cont.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&origin=${encodeURIComponent(window.location.origin)}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture; fullscreen"></iframe>`;
     document.getElementById('player').style.display='none';
-    if(broadcast){fbSync({cmd:'load',url:raw,type:'youtube',name:S.user});fbChat(S.user+' bir YouTube videosu başlattı.',true);toast('YouTube video yüklendi!');}
+    if(broadcast){
+      fbSync({cmd:'load',url:raw,type:'youtube',name:S.user});
+      fbSaveState(raw,'youtube',null,0,true);
+      fbChat(S.user+' bir YouTube videosu başlattı.',true);
+      toast('YouTube video yüklendi!');
+    }
     return;
   }
   // m3u8
@@ -443,7 +596,6 @@ function loadVideoUrl(raw,mode,broadcast){
       S._directLoad=false;
       hls.loadSource(finalUrl);hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED,function(){
-        // Ses — Tip 1 gömülü, Tip 2 ayrı stream
         if(pendAudio&&hls.audioTracks.length>0){
           const idx=hls.audioTracks.findIndex(t=>t.url===pendAudio);
           if(idx!==-1)hls.audioTrack=idx;
@@ -473,7 +625,12 @@ function loadVideoUrl(raw,mode,broadcast){
     } else {
       cont.innerHTML=`<div class="vph" style="height:100%;padding:2rem"><div class="vph-icon">✕</div><p>Bu tarayıcı m3u8 desteklemiyor</p></div>`;return;
     }
-    if(broadcast){fbSync({cmd:'load',url:raw,type:'url',name:S.user,audioUrl:pendAudio||null,direct:isDir});fbChat(S.user+' bir dizi/film başlattı.',true);toast('m3u8 video yüklendi!');}
+    if(broadcast){
+      fbSync({cmd:'load',url:raw,type:'url',name:S.user,audioUrl:pendAudio||null,direct:isDir});
+      fbSaveState(raw,'url',pendAudio,0,true);
+      fbChat(S.user+' bir dizi/film başlattı.',true);
+      toast('m3u8 video yüklendi!');
+    }
     return;
   }
   // mp4
@@ -481,7 +638,12 @@ function loadVideoUrl(raw,mode,broadcast){
   const v2=document.getElementById('hlsvid');pBind(v2);
   document.getElementById('player').style.display='';
   v2.play().catch(()=>{});
-  if(broadcast){fbSync({cmd:'load',url:raw,type:'url',name:S.user});fbChat(S.user+' bir video başlattı.',true);toast('Video yüklendi!');}
+  if(broadcast){
+    fbSync({cmd:'load',url:raw,type:'url',name:S.user});
+    fbSaveState(raw,'url',null,0,true);
+    fbChat(S.user+' bir video başlattı.',true);
+    toast('Video yüklendi!');
+  }
 }
 
 // ── CUSTOM PLAYER ──
@@ -492,7 +654,7 @@ function pReset(){
   document.getElementById('prog-buf').style.width='0%';
   document.getElementById('time-txt').textContent='0:00 / 0:00';
   document.getElementById('ico-play').style.display='';
-document.getElementById('ico-pause').style.display='none';
+  document.getElementById('ico-pause').style.display='none';
   _spdIdx=2;document.getElementById('spd-btn').textContent='1×';
   if(_raf){cancelAnimationFrame(_raf);_raf=null;}
   document.getElementById('player').classList.remove('visible');
@@ -500,16 +662,13 @@ document.getElementById('ico-pause').style.display='none';
 
 function pBind(video){
   const vw=document.getElementById('vwrap');
-  // Mouse/touch → player görünür
   vw.addEventListener('mousemove',pShow);
   vw.addEventListener('touchstart',pTouchShow,{passive:true});
 
-  // Progress bar
   const pw=document.getElementById('prog-wrap');
-  pw.addEventListener('mousedown',e=>{e.stopPropagation();pProgSeek(e,video,pw);});
-  pw.addEventListener('touchstart',e=>{e.stopPropagation();pProgSeekTouch(e,video,pw);},{passive:false});
+  pw.addEventListener('mousedown',e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeek(e,video,pw);});
+  pw.addEventListener('touchstart',e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeekTouch(e,video,pw);},{passive:false});
 
-  // Tap/click
   vw.addEventListener('click',e=>{
     if(e.target.closest('#player'))return;
     const rect=vw.getBoundingClientRect();
@@ -523,17 +682,37 @@ function pBind(video){
     },250);
   });
 
-  // RAF loop
   function raf(){pUpdateTime(video);_raf=requestAnimationFrame(raf);}
   _raf=requestAnimationFrame(raf);
 
-  // play/pause/seek sync
-  video.addEventListener('play',()=>{document.getElementById('ico-play').style.display='none';
-document.getElementById('ico-pause').style.display='';fbSync({cmd:'play'});});
-  video.addEventListener('pause',()=>{document.getElementById('ico-play').style.display='';
-document.getElementById('ico-pause').style.display='none';fbSync({cmd:'pause'});});
+  // play/pause/seek → Firebase state güncelle
+  video.addEventListener('play',()=>{
+    document.getElementById('ico-play').style.display='none';
+    document.getElementById('ico-pause').style.display='';
+    fbSync({cmd:'play'});
+    if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({playing:true,currentTime:video.currentTime,ts:Date.now()});
+  });
+  video.addEventListener('pause',()=>{
+    document.getElementById('ico-play').style.display='';
+    document.getElementById('ico-pause').style.display='none';
+    fbSync({cmd:'pause'});
+    if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({playing:false,currentTime:video.currentTime,ts:Date.now()});
+  });
   let _st=0;
-  video.addEventListener('seeked',()=>{const n=Date.now();if(n-_st>1500){_st=n;fbSync({cmd:'seek',t:video.currentTime});}});
+  video.addEventListener('seeked',()=>{
+    const n=Date.now();
+    if(n-_st>1500){
+      _st=n;
+      fbSync({cmd:'seek',t:video.currentTime});
+      if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({currentTime:video.currentTime,ts:Date.now()});
+    }
+  });
+  // Periyodik state güncellemesi (30sn'de bir konum kaydet)
+  setInterval(()=>{
+    if(S.isHost&&S.fbReady&&video&&!video.paused&&video.currentTime>0){
+      S.db.ref('rooms/'+S.room+'/state').update({currentTime:video.currentTime,playing:!video.paused,ts:Date.now()});
+    }
+  },30000);
 }
 
 function pShow(){
@@ -569,10 +748,19 @@ function pProgSeekTouch(e,video,pw){
   pw.addEventListener('touchmove',tm,{passive:false});pw.addEventListener('touchend',te);
 }
 
-function pPlay(){const v=document.querySelector('#vcont video');if(!v)return;if(v.paused)v.play().catch(()=>{});else v.pause();}
-function pSeek(s){const v=document.querySelector('#vcont video');if(!v)return;v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s));}
+function pPlay(){
+  if(!canControl()){toast('Host kontrolü aktif');return;}
+  const v=document.querySelector('#vcont video');if(!v)return;
+  if(v.paused)v.play().catch(()=>{});else v.pause();
+}
+function pSeek(s){
+  if(!canControl()){toast('Host kontrolü aktif');return;}
+  const v=document.querySelector('#vcont video');if(!v)return;
+  v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s));
+}
 
 function pDoubleTap(side,cnt){
+  if(!canControl()){toast('Host kontrolü aktif');return;}
   const secs=Math.max(cnt-1,1)*10;
   pSeek(side==='right'?secs:-secs);
   const el=document.getElementById(side==='right'?'sf-right':'sf-left');
@@ -601,11 +789,13 @@ function pVol(val){
 }
 
 function pSpeed(){
+  if(!canControl()){toast('Host kontrolü aktif');return;}
   _spdIdx=(_spdIdx+1)%SPEEDS.length;
   const spd=SPEEDS[_spdIdx];
   const v=document.querySelector('#vcont video');if(v)v.playbackRate=spd;
   if(S._audioEl)S._audioEl.playbackRate=spd;
   document.getElementById('spd-btn').textContent=spd+'×';
+  fbSync({cmd:'speed',spd});
 }
 
 function pFullscreen(){
@@ -621,7 +811,7 @@ document.addEventListener('fullscreenchange',()=>{
   if(!document.fullscreenElement)document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
 });
 
-function fmt(s){if(isNaN(s))return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
+function fmt(s){if(isNaN(s)||!s)return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
 
 // ── SUBTITLE ──
 function loadSubtitle(){
@@ -632,17 +822,15 @@ function loadSubtitle(){
   track.kind='subtitles';
   track.label=url.includes('tur')?'Türkçe':url.includes('eng')?'English':'Altyazı';
   track.srclang=url.includes('tur')?'tr':url.includes('eng')?'en':'tr';
-  const savedBase = localStorage.getItem('sf_proxy_base') || 'https://setaflix-proxy.onrender.com';
-const proxyUrl = savedBase + '/proxy?key=setaflix2026&url=';
-const isDirectSub = url.includes('trycloudflare.com') || url.includes('onrender.com');
-const fetchUrl = isDirectSub ? url : proxyUrl + encodeURIComponent(url);
-track.default = true;
-fetch(fetchUrl)
-  .then(r => r.blob())
-  .then(blob => {
-    track.src = URL.createObjectURL(blob);
-  })
-  .catch(() => toast('Altyazı yüklenemedi'));
+  const savedBase=localStorage.getItem('sf_proxy_base')||'https://setaflix-proxy.onrender.com';
+  const proxyUrl=savedBase+'/proxy?key=setaflix2026&url=';
+  const isDirectSub=url.includes('trycloudflare.com')||url.includes('onrender.com');
+  const fetchUrl=isDirectSub?url:proxyUrl+encodeURIComponent(url);
+  track.default=true;
+  fetch(fetchUrl)
+    .then(r=>r.blob())
+    .then(blob=>{track.src=URL.createObjectURL(blob);})
+    .catch(()=>toast('Altyazı yüklenemedi'));
   video.appendChild(track);
   track.addEventListener('load',()=>{if(video.textTracks.length>0)video.textTracks[0].mode='showing';document.getElementById('sub-status').textContent='✓ Altyazı aktif';toast('Altyazı yüklendi!');});
   track.addEventListener('error',()=>{document.getElementById('sub-status').textContent='';toast('Altyazı yüklenemedi');});
@@ -678,12 +866,27 @@ function renderMembers(){
   document.getElementById('vcnt-txt').textContent=Object.keys(S.members).length+' kişi';
   Object.entries(S.members).forEach(([id,m])=>{
     const ini=m.name.slice(0,2).toUpperCase();
-    list.innerHTML+=`<div class="mi"><div class="av" style="background:${m.color}22;color:${m.color};border:1px solid ${m.color}44">${ini}</div><div><div class="mname">${esc(m.name)}</div><div class="mrole">${m.isHost?'Oda sahibi':'İzleyici'}</div></div><div class="oonline"></div>${m.isHost?'<span class="hbadge">HOST</span>':''}</div>`;
+    const isMe=id===S.myId;
+    // İzin butonu: sadece host görebilir, kendi satırında olmaz, sadece kilitli modda anlam taşır
+    const permBtn=S.isHost&&!m.isHost&&!isMe
+      ? `<button class="mperm${S.allowedIds[id]?' on':''}" onclick="toggleMemberPerm('${id}','${esc(m.name)}')">${S.allowedIds[id]?'✓ İzinli':'İzin ver'}</button>`
+      : '';
+    list.innerHTML+=`<div class="mi"><div class="av" style="background:${m.color}22;color:${m.color};border:1px solid ${m.color}44">${ini}</div><div><div class="mname">${esc(m.name)}</div><div class="mrole">${m.isHost?'Oda sahibi':'İzleyici'}</div></div><div class="oonline"></div>${m.isHost?'<span class="hbadge">HOST</span>':permBtn}</div>`;
   });
 }
 
 // ── ROOM CONTROLS ──
-function leaveRoom(){destroyHls();if(S.fbReady&&S.db)S.db.ref('rooms/'+S.room+'/members/'+S.myId).remove();hide('room');show('lobby');document.getElementById('vcont').innerHTML='<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>';document.getElementById('msgs').innerHTML='';S.members={};document.getElementById('mob-tog').style.display='none';document.getElementById('sidebar').classList.remove('mob-open');}
+function leaveRoom(){
+  destroyHls();
+  if(S.fbReady&&S.db)S.db.ref('rooms/'+S.room+'/members/'+S.myId).remove();
+  hide('room');show('lobby');
+  document.getElementById('vcont').innerHTML='<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>';
+  document.getElementById('msgs').innerHTML='';
+  S.members={};S.hostCtrlLocked=false;S.allowedIds={};
+  document.getElementById('mob-tog').style.display='none';
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('btn-hostctrl').style.display='none';
+}
 function copyCode(){navigator.clipboard?.writeText(S.room).catch(()=>{});toast('Oda kodu kopyalandı: '+S.room+' 📋');}
 function swtab(t){document.getElementById('st-chat').classList.toggle('on',t==='chat');document.getElementById('st-mem').classList.toggle('on',t==='members');document.getElementById('sp-chat').classList.toggle('on',t==='chat');document.getElementById('sp-mem').classList.toggle('on',t==='members');}
 function toggleMobSidebar(){document.getElementById('sidebar').classList.toggle('mob-open');}
