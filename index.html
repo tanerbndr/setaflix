@@ -522,7 +522,7 @@ function applySyncCmd(d){
   if(d.cmd==='load'){if(d.audioUrl)S._audioUrl=d.audioUrl;if(d.subtitleUrl)S._subtitleUrl=d.subtitleUrl;S._directLoad=false;loadVideoUrl(d.url,d.type,false);showSyncBar((d.name||'Birisi')+' video yükledi');}
   if(d.cmd==='play'&&vid){vid.play();showSyncBar('Oynatma sync edildi');}
   if(d.cmd==='pause'&&vid){vid.pause();showSyncBar('Durdurma sync edildi');}
-  if(d.cmd==='seek'&&vid){vid.currentTime=d.t;showSyncBar('Konum sync edildi → '+fmt(d.t));}
+  if(d.cmd==='seek'&&vid){clearTimeout(_seekDebounce);_seekDebounce=setTimeout(()=>{vid.currentTime=d.t;showSyncBar('Konum sync edildi → '+fmt(d.t));},300);}
   if(d.cmd==='subtitle'&&d.url){
   document.getElementById('suburl').value=d.url;
   setTimeout(()=>loadSubtitle(false),100);
@@ -651,7 +651,7 @@ function loadVideoUrl(raw,mode,broadcast){
 }
 
 // ── CUSTOM PLAYER ──
-let _raf=null,_tapCnt=0,_tapSide='',_tapTimer=null,_hideTimer=null;
+let _raf=null,_tapCnt=0,_tapSide='',_tapTimer=null,_hideTimer=null,_seekDebounce=null;
 
 function pReset(){
   document.getElementById('prog-fill').style.width='0%';
