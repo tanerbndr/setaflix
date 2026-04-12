@@ -701,6 +701,11 @@ let _seekSendTimer=null;
     _seekSendTimer=setTimeout(()=>{fbSync({cmd:'seek',t:video.currentTime});},500);
   });
   // Periyodik state güncellemesi (30sn'de bir konum kaydet)
+if(S._pendingSeek){
+    const ps=S._pendingSeek;S._pendingSeek=null;
+    const doSeek=()=>{if(ps.time>2)video.currentTime=ps.time;if(ps.playing)video.play().catch(()=>{});else video.pause();showSyncBar('Mevcut konuma atlandı: '+fmt(ps.time));};
+    if(video.readyState>=2)doSeek();else video.addEventListener('canplay',doSeek,{once:true});
+  }
   setInterval(()=>{
     if(S.isHost&&S.fbReady&&video&&!video.paused&&video.currentTime>0){
       S.db.ref('rooms/'+S.room+'/state').update({currentTime:video.currentTime,playing:!video.paused,ts:Date.now()});
