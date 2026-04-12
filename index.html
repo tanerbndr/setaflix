@@ -338,7 +338,7 @@ const S={
   hostCtrlLocked:false,  // true = sadece host kontrol edebilir
   allowedIds:{},         // hostCtrlLocked=true iken izin verilen üye id'leri
   // Yeniden bağlanma
-  _reconnectTimer:null
+  _reconnectTimer:null,_pendingSeek:null
 };
 const SPEEDS=[0.5,0.75,1,1.25,1.5,2]; let _spdIdx=2;
 const COLORS=['#6c47ff','#a78bfa','#38bdf8','#22d3a0','#fbbf24','#f87171','#fb923c','#e879f9'];
