@@ -428,15 +428,7 @@ function fbJoin(){
     if(d.audioUrl)S._audioUrl=d.audioUrl;
     S._directLoad=false;
     loadVideoUrl(d.url,d.type||'url',false);
-    // Video yüklendikten sonra doğru konuma atla
-    setTimeout(()=>{
-      const vid=document.querySelector('#vcont video');
-      if(!vid)return;
-      if(d.currentTime&&d.currentTime>2)vid.currentTime=d.currentTime;
-      if(d.playing)vid.play().catch(()=>{});
-      else vid.pause();
-      showSyncBar('Mevcut konuma atlandı: '+fmt(d.currentTime||0));
-    },3500);
+   S._pendingSeek={time:d.currentTime||0,playing:d.playing};
   });
 
   // Yeniden bağlanma — online/offline takibi
