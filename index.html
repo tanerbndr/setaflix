@@ -523,7 +523,11 @@ function applySyncCmd(d){
   if(d.cmd==='play'&&vid){vid.play();showSyncBar('Oynatma sync edildi');}
   if(d.cmd==='pause'&&vid){vid.pause();showSyncBar('Durdurma sync edildi');}
   if(d.cmd==='seek'&&vid){vid.currentTime=d.t;showSyncBar('Konum sync edildi → '+fmt(d.t));}
-  if(d.cmd==='subtitle'&&d.url){document.getElementById('suburl').value=d.url;loadSubtitle(false);showSyncBar((d.name||'Birisi')+' altyazı ekledi');}
+  if(d.cmd==='subtitle'&&d.url){
+  document.getElementById('suburl').value=d.url;
+  setTimeout(()=>loadSubtitle(false),100);
+  showSyncBar((d.name||'Birisi')+' altyazı ekledi');
+}
   if(d.cmd==='speed'&&vid){vid.playbackRate=d.spd;if(S._audioEl)S._audioEl.playbackRate=d.spd;document.getElementById('spd-btn').textContent=d.spd+'×';showSyncBar('Hız: '+d.spd+'×');}
 }
 function syncNow(){const vid=document.querySelector('#vcont video');if(vid){fbSync({cmd:'seek',t:vid.currentTime});toast('Sync gönderildi →');}else toast('Önce video yükle');}
