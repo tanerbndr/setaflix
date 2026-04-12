@@ -702,14 +702,11 @@ function pBind(video){
     fbSync({cmd:'pause'});
     if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({playing:false,currentTime:video.currentTime,ts:Date.now()});
   });
-  let _st=0;
+let _seekSendTimer=null;
   video.addEventListener('seeked',()=>{
-    const n=Date.now();
-    if(n-_st>1500){
-      _st=n;
-      fbSync({cmd:'seek',t:video.currentTime});
-      if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({currentTime:video.currentTime,ts:Date.now()});
-    }
+    if(S.fbReady&&S.isHost)S.db.ref('rooms/'+S.room+'/state').update({currentTime:video.currentTime,ts:Date.now()});
+    clearTimeout(_seekSendTimer);
+    _seekSendTimer=setTimeout(()=>{fbSync({cmd:'seek',t:video.currentTime});},500);
   });
   // Periyodik state güncellemesi (30sn'de bir konum kaydet)
   setInterval(()=>{
