@@ -814,7 +814,7 @@ document.addEventListener('fullscreenchange',()=>{
 function fmt(s){if(isNaN(s)||!s)return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
 
 // ── SUBTITLE ──
-function loadSubtitle(){
+function loadSubtitle(broadcast=true){
   const url=v('suburl');if(!url){toast('Altyazı URL gir!');return;}
   const video=document.querySelector('#vcont video');if(!video){toast('Önce video yükle!');return;}
   video.querySelectorAll('track').forEach(t=>t.remove());
@@ -835,7 +835,7 @@ function loadSubtitle(){
   track.addEventListener('load',()=>{if(video.textTracks.length>0)video.textTracks[0].mode='showing';document.getElementById('sub-status').textContent='✓ Altyazı aktif';toast('Altyazı yüklendi!');});
   track.addEventListener('error',()=>{document.getElementById('sub-status').textContent='';toast('Altyazı yüklenemedi');});
   setTimeout(()=>{if(video.textTracks.length>0){video.textTracks[0].mode='showing';document.getElementById('sub-status').textContent='✓ Altyazı aktif';}},500);
-  if(S.fbReady){fbSync({cmd:'subtitle',url,name:S.user});fbChat(S.user+' altyazı ekledi.',true);}
+  if(S.fbReady&&broadcast){fbSync({cmd:'subtitle',url,name:S.user});fbChat(S.user+' altyazı ekledi.',true);}
 }
 function removeSubtitle(){
   const video=document.querySelector('#vcont video');if(!video){toast('Video yok!');return;}
