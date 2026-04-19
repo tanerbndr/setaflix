@@ -213,7 +213,7 @@ function _lockPlayerForHost() {
   vw.addEventListener('mousemove', pShow);
   vw.addEventListener('touchstart', pTouchShow, {passive:true});
   document.getElementById('btn-pp').style.display = 'none';
-  document.getElementById('btn-back10').style.display = 'none';
+  document.getElementById('btn-back60').style.display = 'none';
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('spd-btn').style.display = 'none';
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
@@ -240,7 +240,7 @@ function _lockPlayerForViewer() {
   document.getElementById('spd-btn').style.display = 'none';
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
   // -10s butonu buffer moduna geçer
-  document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
+  document.getElementById('btn-back60').onclick = () => rewindWebRTC(60);
 }
 
 function _unlockPlayer() {
@@ -251,11 +251,11 @@ function _unlockPlayer() {
   vw.removeEventListener('touchstart', pTouchShow);
   document.getElementById('btn-pp').style.display = '';
   document.getElementById('btn-pp').onclick = null;
-  document.getElementById('btn-back10').style.display = '';
+  document.getElementById('btn-back60').style.display = '';
   document.getElementById('btn-fwd10').style.display = '';
   document.getElementById('spd-btn').style.display = '';
   document.getElementById('time-txt').textContent = '0:00 / 0:00';
-  document.getElementById('btn-back10').onclick = () => pSeek(-10);
+  document.getElementById('btn-back60').onclick = () => pSeek(-60);
   document.querySelector('.vol-row').style.display = '';
 }
 
@@ -347,8 +347,8 @@ function rewindWebRTC(secs) {
   document.getElementById('btn-fwd10').onclick = () => {
     vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10);
   };
-  document.getElementById('btn-back10').onclick = () => {
-    vid.currentTime = Math.max(0, vid.currentTime - 10);
+  document.getElementById('btn-back60').onclick = () => {
+    vid.currentTime = Math.max(0, vid.currentTime - 60);
   };
 
   // Seekbar (pBind yok buffer modda → elle ekle)
@@ -414,7 +414,7 @@ function goLiveWebRTC() {
     else v.pause();
   };
   document.getElementById('btn-fwd10').style.display = 'none';
-  document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
+  document.getElementById('btn-back60').onclick = () => rewindWebRTC(60);
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
 
   _hideGoLiveBtn();

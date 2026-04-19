@@ -506,64 +506,6 @@ body::before{
 .sflash.right{right:0;background:radial-gradient(ellipse at right,rgba(255,255,255,0.12),transparent 70%);}
 .sflash.show{opacity:1;}
 
-/* ── DRAW PENCIL BUTTON ── */
-.draw-toggle{
-  position:absolute;left:10px;top:50%;transform:translateY(-50%);
-  width:36px;height:36px;border-radius:10px;
-  background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);
-  color:rgba(255,255,255,0.7);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  z-index:25;transition:all 0.2s;backdrop-filter:blur(8px);
-}
-.draw-toggle:hover{background:rgba(0,0,0,0.8);color:#fff;border-color:var(--acc);}
-.draw-toggle.active{background:rgba(230,57,70,0.25);border-color:var(--acc);color:var(--acc);box-shadow:0 0 12px rgba(230,57,70,0.4);}
-.draw-toggle svg{width:18px;height:18px;fill:currentColor;}
-
-/* ── DRAW CANVAS ── */
-#draw-canvas{
-  position:absolute;inset:0;z-index:20;
-  pointer-events:none;cursor:crosshair;
-}
-#draw-canvas.active{pointer-events:all;}
-
-/* ── DRAW TOOLBAR ── */
-.draw-toolbar{
-  position:absolute;left:54px;top:50%;transform:translateY(-50%);
-  display:none;flex-direction:column;gap:6px;
-  background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,0.1);border-radius:14px;
-  padding:10px 8px;z-index:26;
-  animation:panel-in 0.2s ease;
-}
-.draw-toolbar.visible{display:flex;}
-.draw-swatch{
-  width:24px;height:24px;border-radius:50%;
-  border:2px solid transparent;cursor:pointer;
-  transition:all 0.2s;flex-shrink:0;
-}
-.draw-swatch:hover{transform:scale(1.2);}
-.draw-swatch.active{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,0.5);}
-.draw-divider{height:1px;background:rgba(255,255,255,0.1);margin:2px 0;}
-.draw-tool-btn{
-  width:24px;height:24px;border-radius:6px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:transparent;color:rgba(255,255,255,0.7);
-  cursor:pointer;display:flex;align-items:center;
-  justify-content:center;transition:all 0.2s;font-size:0.75rem;
-}
-.draw-tool-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
-.draw-tool-btn.active{background:rgba(230,57,70,0.3);border-color:var(--acc);color:var(--acc);}
-.draw-tool-btn svg{width:14px;height:14px;fill:currentColor;}
-
-/* ── HOST DRAW TOGGLE BUTTON ── */
-.btn-draw-allow{
-  background:rgba(0,180,216,0.08);border:1px solid rgba(0,180,216,0.2);
-  color:var(--acc3);padding:0.4rem 0.8rem;border-radius:9px;
-  font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;
-  font-family:'Barlow Condensed',sans-serif;letter-spacing:0.04em;display:none;
-}
-.btn-draw-allow:hover{background:rgba(0,180,216,0.18);}
-.btn-draw-allow.on{background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.3);color:var(--ok);}
 
 /* ── VIDEO CONTROLS AREA ── */
 .vctl{
@@ -618,9 +560,13 @@ body::before{
 .sub-active{color:var(--ok);font-size:0.78rem;font-weight:600;}
 
 #vcont video::cue{
-  background:rgba(0,0,0,0.65);color:#fff;
-  font-family:'Karla',sans-serif;font-size:1.4rem;font-weight:600;
-  text-shadow:0 2px 4px rgba(0,0,0,0.8);border-radius:4px;padding:3px 7px;
+  background:transparent;
+  color:#fff;
+  font-family:'Karla',sans-serif;
+  font-size:1.55rem;
+  font-weight:700;
+  text-shadow:0 1px 3px rgba(0,0,0,1),0 0 12px rgba(0,0,0,0.9),0 2px 8px rgba(0,0,0,0.8);
+  line-height:1.5;
 }
 
 .syncbar{
@@ -949,12 +895,10 @@ body::before{
   .sidebar.mob-open{display:flex;animation:slide-up 0.32s cubic-bezier(0.22,1,0.36,1) forwards;}
   @keyframes slide-up{from{transform:translateY(100%);}to{transform:translateY(0);}}
   .mob-stoggle{display:flex;align-items:center;justify-content:center;}
-  .draw-toolbar{left:auto;right:54px;top:50%;}
   .rhead{gap:0.4rem;padding:0.6rem 0.9rem;}
   .vctl{gap:5px;padding:0.6rem 0.9rem;}
   #lobby{padding:2.5rem 1rem 2rem;}
   .logo{font-size:clamp(3rem,12vw,5rem);}
   .vol-sl{width:55px;}
   .frcts{right:16px;}
-  .btn-draw-allow{font-size:0.7rem;padding:0.35rem 0.65rem;}
 }

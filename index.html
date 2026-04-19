@@ -101,7 +101,6 @@
     </div>
     <div class="vcnt-wrap"><div class="ldot"></div><span id="vcnt-txt">1</span></div>
     <button class="bhost" id="btn-hostctrl" style="display:none" onclick="toggleHostControl()">🔓 Serbest</button>
-    <button class="btn-draw-allow" id="btn-draw-allow" onclick="toggleDrawAllow()">✏️ Çizim Aç</button>
     <!-- Theme toggle in room -->
     <div style="position:relative;">
       <button class="rtheme-btn" id="rtheme-btn" onclick="toggleThemePanel()" title="Tema">🎨</button>
@@ -127,33 +126,6 @@
           </div>
         </div>
 
-        <!-- Draw Canvas -->
-        <canvas id="draw-canvas"></canvas>
-
-        <!-- Draw Pencil Toggle -->
-        <button class="draw-toggle" id="draw-toggle" onclick="toggleDraw()" title="Çizim Aracı">
-          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-        </button>
-
-        <!-- Draw Toolbar -->
-        <div class="draw-toolbar" id="draw-toolbar">
-          <button class="draw-swatch active" data-color="#FFFFFF" style="background:#fff" onclick="setDrawColor('#FFFFFF',this)" title="Beyaz"></button>
-          <button class="draw-swatch" data-color="#E63946" style="background:#E63946" onclick="setDrawColor('#E63946',this)" title="Kırmızı"></button>
-          <button class="draw-swatch" data-color="#F4D35E" style="background:#F4D35E" onclick="setDrawColor('#F4D35E',this)" title="Sarı"></button>
-          <button class="draw-swatch" data-color="#06D6A0" style="background:#06D6A0" onclick="setDrawColor('#06D6A0',this)" title="Yeşil"></button>
-          <button class="draw-swatch" data-color="#00B4D8" style="background:#00B4D8" onclick="setDrawColor('#00B4D8',this)" title="Mavi"></button>
-          <div class="draw-divider"></div>
-          <button class="draw-tool-btn" id="draw-size-btn" onclick="cycleDrawSize()" title="Kalınlık">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
-          </button>
-          <button class="draw-tool-btn" id="draw-eraser-btn" onclick="toggleEraser()" title="Silgi">
-            <svg viewBox="0 0 24 24"><path d="M15.14 3L3 15.14 8.86 21H21V18.97L15.14 3zm-4.31 13.38L7.2 12.76l7.07-7.07 3.62 3.62-7.06 7.07z"/></svg>
-          </button>
-          <button class="draw-tool-btn" onclick="clearDraw()" title="Temizle">
-            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-          </button>
-        </div>
-
         <!-- Player -->
         <div id="player">
           <div class="prog-wrap" id="prog-wrap">
@@ -165,8 +137,8 @@
               <svg id="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               <svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
-            <button class="cbtn" id="btn-back10" onclick="pSeek(-10)" title="-10s">
-              <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
+            <button class="cbtn" id="btn-back60" onclick="pSeek(-60)" title="-1 dakika">
+              <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="6" y="16" font-size="4.5" fill="white" font-family="sans-serif" font-weight="bold">1m</text></svg>
             </button>
             <button class="cbtn" id="btn-fwd10" onclick="pSeek(10)" title="+10s">
               <svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
@@ -256,8 +228,6 @@
 <script src="player.js"></script>
 <script src="chat.js"></script>
 <script src="webrtc.js"></script>
-<script src="draw.js"></script>
-
 <script>
 /* ── THEME SYSTEM ── */
 function setTheme(t){

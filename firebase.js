@@ -75,17 +75,6 @@ function fbJoin(){
     if(typeof onWebRTCActive==='function')onWebRTCActive(snap.val());
   });
 
-  // draw permission
-  ref.child('draw/enabled').on('value',snap=>{
-    if(typeof onDrawEnabled==='function') onDrawEnabled(snap.val());
-  });
-  // draw strokes (last 50)
-  ref.child('draw/strokes').limitToLast(50).on('child_added',snap=>{
-    const d=snap.val();
-    if(!d)return;
-    if(typeof onRemoteStroke==='function') onRemoteStroke(d);
-  });
-
   ref.child('hostctrl').on('value',snap=>{
     const d=snap.val();
     if(!d)return;

@@ -69,7 +69,7 @@ function loadVideoUrl(raw,mode,broadcast){
 
   // m3u8
   if(isM3u8(raw)){
-    const isDir=S._directLoad;
+    let isDir=S._directLoad;
     const pendAudio=S._audioUrl;
     S._audioUrl=null;
     cont.innerHTML=`<video id="hlsvid" playsinline style="background:#000;width:100%;height:100%"></video>`;
@@ -96,9 +96,16 @@ function loadVideoUrl(raw,mode,broadcast){
         if(S._subtitleUrl){document.getElementById('suburl').value=S._subtitleUrl;loadSubtitle();S._subtitleUrl=null;}
         video.play().catch(()=>{});
       });
+      let _proxyRetried=false;
       hls.on(Hls.Events.ERROR,function(e,data){
         if(data.fatal){
-          if(data.type===Hls.ErrorTypes.NETWORK_ERROR){toast('m3u8 ağ hatası');hls.startLoad();}
+          if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
+            if(isDir&&!_proxyRetried&&key){
+              _proxyRetried=true;isDir=false;
+              hls.loadSource(proxy+encodeURIComponent(raw));
+              hls.startLoad();
+            } else {toast('m3u8 ağ hatası');hls.startLoad();}
+          }
           else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){toast('Medya hatası — kurtarılıyor...');hls.recoverMediaError();}
           else{toast('Video yüklenemedi');hls.destroy();}
         }
@@ -212,6 +219,7 @@ function pBind(video){
   video.addEventListener('play',()=>{
     document.getElementById('ico-play').style.display='none';
     document.getElementById('ico-pause').style.display='';
+    pShow();
     fbSync({cmd:'play'});
     if(S.fbReady)S.db.ref('rooms/'+S.room+'/state').update({playing:true,currentTime:video.currentTime,ts:Date.now()});
   });
@@ -277,7 +285,16 @@ function pProgSeekTouch(e,video,pw){
 function pPlay(){
   if(!canControl()){toast('Host kontrolü aktif');return;}
   const v=document.querySelector('#vcont video');if(!v)return;
-  if(v.paused)v.play().catch(()=>{});else v.pause();
+  if(v.paused){
+    if(S.hls){
+      const lvl=S.hls.levels&&S.hls.levels[S.hls.currentLevel];
+      if(lvl&&lvl.details&&lvl.details.live&&S.hls.liveSyncPosition)
+        v.currentTime=S.hls.liveSyncPosition;
+    }
+    v.play().catch(()=>{});
+  } else {
+    v.pause();
+  }
 }
 function pSeek(s){
   if(!canControl()){toast('Host kontrolü aktif');return;}
