@@ -143,7 +143,7 @@ function _showWebRTCLocal(stream) {
   const vcont = document.getElementById('vcont');
   vcont.innerHTML = '';
   const vid = document.createElement('video');
-  vid.autoplay = true; vid.playsInline = true; vid.muted = false;
+  vid.autoplay = true; vid.playsInline = true; vid.muted = true;
   vid.srcObject = stream;
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
@@ -163,6 +163,7 @@ function _showWebRTCRemote(stream, hostName) {
   vid.srcObject = stream;
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
+  vid.play().catch(() => {});
   document.getElementById('player').style.display = '';
   _setBottomBars(false);
   _lockPlayerForViewer();
