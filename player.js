@@ -177,7 +177,7 @@ function pReset(){
   document.getElementById('ico-pause').style.display='none';
   _spdIdx=2;document.getElementById('spd-btn').textContent='1×';
   if(_raf){cancelAnimationFrame(_raf);_raf=null;}
-  document.getElementById('player').classList.remove('visible');
+  document.getElementById('player').classList.remove('visible','wrtc-mode');
 }
 
 function pBind(video){
