@@ -73,6 +73,7 @@ async function startScreenShare() {
 }
 
 async function stopScreenShare() {
+  if (!S.isHost) { toast('Sadece oda sahibi paylaşımı durdurabilir'); return; }
   if (_localStream) { _localStream.getTracks().forEach(t => t.stop()); _localStream = null; }
   if (_pc) { _pc.close(); _pc = null; }
   if (_wRef) { _wRef.remove(); _wRef = null; }
@@ -190,6 +191,10 @@ function _hideWebRTC() {
 function _lockPlayerForHost(vid) {
   const player = document.getElementById('player');
   player.classList.add('wrtc-mode');
+  player.classList.add('visible');
+  const vw = document.getElementById('vwrap');
+  vw.addEventListener('mousemove', pShow);
+  vw.addEventListener('touchstart', pTouchShow, {passive:true});
   document.getElementById('btn-pp').style.display = 'none';
   document.getElementById('btn-back10').style.display = 'none';
   document.getElementById('btn-fwd10').style.display = 'none';
@@ -201,6 +206,10 @@ function _lockPlayerForHost(vid) {
 function _lockPlayerForViewer(vid) {
   const player = document.getElementById('player');
   player.classList.add('wrtc-mode');
+  player.classList.add('visible');
+  const vw = document.getElementById('vwrap');
+  vw.addEventListener('mousemove', pShow);
+  vw.addEventListener('touchstart', pTouchShow, {passive:true});
   document.getElementById('btn-pp').style.display = 'none';
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('spd-btn').style.display = 'none';
@@ -212,7 +221,10 @@ function _lockPlayerForViewer(vid) {
 
 function _unlockPlayer() {
   const player = document.getElementById('player');
-  player.classList.remove('wrtc-mode');
+  player.classList.remove('wrtc-mode', 'visible');
+  const vw = document.getElementById('vwrap');
+  vw.removeEventListener('mousemove', pShow);
+  vw.removeEventListener('touchstart', pTouchShow);
   document.getElementById('btn-pp').style.display = '';
   document.getElementById('btn-back10').style.display = '';
   document.getElementById('btn-fwd10').style.display = '';
