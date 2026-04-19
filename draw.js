@@ -196,7 +196,7 @@ function toggleDrawAllow(){
   if(!S.isHost) return;
   S.drawEnabled = !S.drawEnabled;
   const btn = document.getElementById('btn-draw-allow');
-  btn.textContent = S.drawEnabled ? '✏️ Çizim Aç' : '✏️ Çizim Kapat';
+  btn.textContent = S.drawEnabled ? '✏️ Çizim Kapat' : '✏️ Çizim Aç';
   btn.classList.toggle('on', S.drawEnabled);
   if(S.fbReady) S.db.ref('rooms/'+S.room+'/draw/enabled').set(S.drawEnabled);
   toast(S.drawEnabled ? 'Çizim izni verildi' : 'Çizim kapatıldı');
@@ -229,11 +229,4 @@ function onDrawClear(){
   Draw.clearCanvas();
 }
 
-window.addEventListener('load', () => {
-  Draw.init();
-  // Show draw-allow button for host
-  if(S.isHost){
-    const btn = document.getElementById('btn-draw-allow');
-    if(btn) btn.style.display = '';
-  }
-});
+window.addEventListener('load', () => { Draw.init(); });
