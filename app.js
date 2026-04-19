@@ -23,6 +23,8 @@ function checkAutoload(){
   S._audioUrl=p.get('audio')?decodeURIComponent(p.get('audio')):null;
   S._subtitleUrl=p.get('subtitle')?decodeURIComponent(p.get('subtitle')):null;
   S.pendingCookies=p.get('cookies')?decodeURIComponent(p.get('cookies')):null;
+  if(p.get('proxyBase'))localStorage.setItem('sf_proxy_base',decodeURIComponent(p.get('proxyBase')));
+  if(p.get('proxyKey'))localStorage.setItem('sf_proxy_key',decodeURIComponent(p.get('proxyKey')));
   window.history.replaceState({},'',window.location.pathname);
   const doLoad=()=>{document.getElementById('vurl').value=decodeURIComponent(al);srcMode('url');loadVideo();};
   if(document.getElementById('room').classList.contains('on'))doLoad();

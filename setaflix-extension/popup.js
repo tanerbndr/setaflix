@@ -375,7 +375,9 @@ document.getElementById('btn-open').addEventListener('click', () => {
   const audioParam = state.selectedAudioUri ? '&audio='    + encodeURIComponent(state.selectedAudioUri) : '';
   const directFlag = (sel && sel.proxyStatus === 'direct') ? '&direct=1' : '';
  const cookieParam = sel.cookies ? '&cookies=' + encodeURIComponent(sel.cookies) : '';
-const url = `${SETAFLIX}?autoload=${encodeURIComponent(videoUrl)}${audioParam}${subParam}${directFlag}${cookieParam}`;
+const proxyBaseParam = state.proxyBase ? '&proxyBase=' + encodeURIComponent(state.proxyBase) : '';
+const proxyKeyParam  = state.proxyKey  ? '&proxyKey='  + encodeURIComponent(state.proxyKey)  : '';
+const url = `${SETAFLIX}?autoload=${encodeURIComponent(videoUrl)}${audioParam}${subParam}${directFlag}${cookieParam}${proxyBaseParam}${proxyKeyParam}`;
   chrome.tabs.create({ url });
 });
 

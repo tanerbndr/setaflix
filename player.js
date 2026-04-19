@@ -145,7 +145,8 @@ function loadSubtitle(broadcast=true){
   track.label=url.includes('tur')?'Türkçe':url.includes('eng')?'English':'Altyazı';
   track.srclang=url.includes('tur')?'tr':url.includes('eng')?'en':'tr';
   const savedBase=localStorage.getItem('sf_proxy_base')||'https://setaflix-proxy.onrender.com';
-  const proxyUrl=savedBase+'/proxy?key=setaflix2026&url=';
+  const savedKey=localStorage.getItem('sf_proxy_key')||'';
+  const proxyUrl=savedBase+'/proxy?key='+encodeURIComponent(savedKey)+'&url=';
   const isDirectSub=url.includes('trycloudflare.com')||url.includes('onrender.com');
   const fetchUrl=isDirectSub?url:proxyUrl+encodeURIComponent(url);
   track.default=true;
