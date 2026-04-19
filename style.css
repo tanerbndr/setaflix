@@ -171,8 +171,9 @@ body::before{
 ══════════════════════════════════════════ */
 #lobby{
   flex-direction:column;align-items:center;
-  justify-content:center;padding:2rem 1.5rem;
-  overflow:visible;
+  justify-content:flex-start;
+  padding:3.5rem 1.5rem 2.5rem;
+  overflow-y:auto;
 }
 
 .logo{
@@ -951,6 +952,7 @@ body::before{
   .draw-toolbar{left:auto;right:54px;top:50%;}
   .rhead{gap:0.4rem;padding:0.6rem 0.9rem;}
   .vctl{gap:5px;padding:0.6rem 0.9rem;}
+  #lobby{padding:2.5rem 1rem 2rem;}
   .logo{font-size:clamp(3rem,12vw,5rem);}
   .vol-sl{width:55px;}
   .frcts{right:16px;}
