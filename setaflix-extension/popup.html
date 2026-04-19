@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>SeTaFlix Helper</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  width: 340px;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0d0d14;
+  color: #eeeaf8;
+  padding: 14px;
+}
+h1 {
+  font-size: 15px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a78bfa, #6c47ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+/* ── Durum Bandı ── */
+.status-bar {
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.s-waiting  { background: #1a1a2a; color: #8b87a8; }
+.s-pending  { background: #1a1a2a; color: #a78bfa; }
+.s-direct   { background: #0d2d1a; color: #22d3a0; border: 1px solid rgba(34,211,160,0.2); }
+.s-proxy    { background: #1a2a0d; color: #86efac; border: 1px solid rgba(134,239,172,0.2); }
+.s-failed   { background: #2d1a0d; color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.s-warn     { background: #2d1a0d; color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+/* ── Capture Listesi ── */
+.capture-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+
+.capture-card {
+  background: #13131f;
+  border: 1px solid rgba(108,71,255,0.15);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+}
+.capture-card:hover   { border-color: rgba(108,71,255,0.4); }
+.capture-card.selected {
+  border-color: #6c47ff;
+  background: #16132a;
+}
+
+.card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.card-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(108,71,255,0.2);
+  color: #a78bfa;
+  white-space: nowrap;
+}
+.card-url {
+  font-size: 10px;
+  color: #8b87a8;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Parse edilmiş detaylar */
+.card-details { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.detail-row   { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.detail-label { font-size: 10px; color: #8b87a8; min-width: 50px; }
+.pill {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #1a1a2a;
+  color: #eeeaf8;
+  cursor: pointer;
+  transition: background .1s, border-color .1s;
+  white-space: nowrap;
+}
+.pill:hover    { background: #22203a; border-color: #6c47ff; }
+.pill.selected { background: #6c47ff; border-color: #6c47ff; color: #fff; }
+
+/* ── Alt Butonlar ── */
+.actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.btn {
+  width: 100%;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn:hover      { opacity: .85; }
+.btn:disabled   { opacity: .4; cursor: not-allowed; }
+.btn-open       { background: #6c47ff; color: #fff; }
+.btn-copy       { background: #1a1a2a; color: #a78bfa; border: 1px solid rgba(108,71,255,0.3); font-size: 11px; }
+.btn-clear      { background: #1a1a2a; color: #8b87a8; border: 1px solid rgba(255,255,255,0.06); font-size: 11px; }
+.btn-tunnel     { background: #1a1a2a; color: #8b87a8; border: 1px solid rgba(255,255,255,0.06); font-size: 11px; }
+
+.toast { font-size: 11px; color: #22d3a0; text-align: center; height: 14px; margin-top: 4px; }
+
+/* ── Tunnel ayar ekranı ── */
+#sec-tunnel { display: none; }
+.lbl { font-size: 10px; color: #8b87a8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; margin-top: 8px; }
+.inp {
+  width: 100%;
+  background: #1a1a2a;
+  border: 1px solid rgba(108,71,255,0.3);
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 11px;
+  color: #eeeaf8;
+  outline: none;
+  font-family: monospace;
+  margin-bottom: 6px;
+}
+.inp:focus { border-color: #6c47ff; }
+.btn-save { background: #22d3a0; color: #0d0d14; }
+
+/* ── Boş durum ── */
+#sec-waiting { display: none; }
+</style>
+</head>
+<body>
+  <h1>🎬 SeTaFlix Helper</h1>
+
+  <!-- Bekleme ekranı -->
+  <div id="sec-waiting">
+    <div class="status-bar s-waiting">⏳ Henüz stream yakalanmadı. Videoyu başlat.</div>
+    <div class="status-bar s-warn" id="warn-bar" style="display:none">
+      ⚠️ 10 saniye geçti, stream yakalanamadı.<br>Bu site korumalı olabilir (dizipal/dizibox gibi).
+    </div>
+    <div class="actions">
+      <button class="btn btn-tunnel" id="btn-tunnel-waiting">🔧 Tunnel URL Güncelle</button>
+    </div>
+  </div>
+
+  <!-- Ana ekran -->
+  <div id="sec-main" style="display:none">
+    <div class="status-bar s-waiting" id="status-bar">⏳ Analiz ediliyor...</div>
+    <div class="capture-list" id="capture-list"></div>
+    <div class="actions">
+      <button class="btn btn-open" id="btn-open" disabled>▶ SeTaFlix'te Aç</button>
+      <button class="btn btn-copy" id="btn-copy" disabled>📋 Video URL'yi Kopyala</button>
+      <button class="btn btn-clear" id="btn-clear">🗑 Temizle</button>
+      <button class="btn btn-tunnel" id="btn-tunnel-main">🔧 Tunnel URL Güncelle</button>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- Tunnel ayar ekranı -->
+  <div id="sec-tunnel">
+    <div class="status-bar s-failed">🔧 Proxy Ayarları</div>
+    <div class="lbl">Proxy URL (https://setaflix-proxy.onrender.com)</div>
+    <input class="inp" id="tunnel-input" placeholder="https://setaflix-proxy.onrender.com">
+    <div class="lbl">Proxy Secret Key (Render.com → Environment Variables)</div>
+    <input class="inp" id="key-input" type="password" placeholder="Render'dan kopyaladığın key...">
+    <button class="btn btn-save" id="btn-save-tunnel">💾 Kaydet</button>
+    <div class="toast" id="toast-tunnel"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

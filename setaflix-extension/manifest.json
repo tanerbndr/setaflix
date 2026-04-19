@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "SeTaFlix Helper",
+  "version": "2.0",
+  "description": "Stream'leri yakalar, akıllıca sınıflandırır, SeTaFlix'e tek tıkla gönderir.",
+  "permissions": [
+    "webRequest",
+    "cookies",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
