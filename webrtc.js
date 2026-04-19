@@ -148,7 +148,8 @@ function _showWebRTCLocal(stream) {
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
   document.getElementById('player').style.display = '';
-  _lockPlayerForHost(vid);
+  _setBottomBars(false);
+  _lockPlayerForHost();
   _showWebRTCBadge(null, true);
 }
 
@@ -163,7 +164,8 @@ function _showWebRTCRemote(stream, hostName) {
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
   document.getElementById('player').style.display = '';
-  _lockPlayerForViewer(vid);
+  _setBottomBars(false);
+  _lockPlayerForViewer();
   _showWebRTCBadge(hostName, false);
   _startBuffer(stream);
   showSyncBar(hostName + ' ekranı paylaşıyor');
@@ -178,17 +180,24 @@ function _hideWebRTC() {
   const vcont = document.getElementById('vcont');
   vcont.innerHTML = '<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>';
   document.getElementById('player').style.display = '';
+  _setBottomBars(true);
   _hideWebRTCBadge();
-  const vol = document.getElementById('webrtc-vol');
-  if (vol) vol.remove();
   const glb = document.getElementById('webrtc-golive');
   if (glb) glb.remove();
   pReset();
 }
 
+function _setBottomBars(visible) {
+  const d = visible ? '' : 'none';
+  ['vctl','syncbar','subbar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && id !== 'syncbar') el.style.display = d;
+  });
+}
+
 // ── PLAYER KİLİT / AÇMA ──
 
-function _lockPlayerForHost(vid) {
+function _lockPlayerForHost() {
   const player = document.getElementById('player');
   player.classList.add('wrtc-mode');
   player.classList.add('visible');
@@ -200,10 +209,9 @@ function _lockPlayerForHost(vid) {
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('spd-btn').style.display = 'none';
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
-  _appendVolControl(vid);
 }
 
-function _lockPlayerForViewer(vid) {
+function _lockPlayerForViewer() {
   const player = document.getElementById('player');
   player.classList.add('wrtc-mode');
   player.classList.add('visible');
@@ -216,7 +224,6 @@ function _lockPlayerForViewer(vid) {
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
   // -10s butonu buffer'a geri sarar
   document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
-  _appendVolControl(vid);
 }
 
 function _unlockPlayer() {
@@ -304,6 +311,7 @@ function rewindWebRTC(secs) {
 
   // Player kontrollerini buffer modu için aç
   document.getElementById('btn-pp').style.display = '';
+  document.getElementById('btn-fwd10').style.display = '';
   document.getElementById('btn-back10').onclick = () => pSeek(-10);
   pBind(vid);
 
@@ -327,9 +335,9 @@ function goLiveWebRTC() {
 
   // Player'ı tekrar viewer moduna al
   document.getElementById('btn-pp').style.display = 'none';
+  document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
-  _appendVolControl(vid);
 
   _hideGoLiveBtn();
   _showWebRTCBadge(null, false);

@@ -318,14 +318,28 @@ function pSpeed(){
 }
 function pFullscreen(){
   const vw=document.getElementById('vwrap');
-  if(!document.fullscreenElement){
-    vw.requestFullscreen().catch(()=>{});
+  const vid=document.querySelector('#vcont video');
+  const isFs=document.fullscreenElement||document.webkitFullscreenElement;
+  if(!isFs){
+    // iOS Safari: sadece video elementi fullscreen destekler
+    if(vid&&vid.webkitEnterFullscreen){
+      vid.webkitEnterFullscreen();
+    } else {
+      const fn=vw.requestFullscreen||vw.webkitRequestFullscreen;
+      if(fn)fn.call(vw).catch(()=>{});
+    }
+    screen.orientation?.lock?.('landscape-primary').catch(()=>{});
     document.getElementById('ico-fs').setAttribute('d','M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z');
   } else {
-    document.exitFullscreen();
+    (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+    screen.orientation?.unlock?.();
   }
 }
 document.addEventListener('fullscreenchange',()=>{
-  if(!document.fullscreenElement)
+  if(!document.fullscreenElement&&!document.webkitFullscreenElement)
+    document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
+});
+document.addEventListener('webkitfullscreenchange',()=>{
+  if(!document.webkitFullscreenElement)
     document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
 });
