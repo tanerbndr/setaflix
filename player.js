@@ -29,7 +29,8 @@ function startExtAudio(audioUrl,video,direct){
   document.body.appendChild(audio);
   S._audioEl=audio;
   const base=localStorage.getItem('sf_proxy_base')||'https://setaflix-proxy.onrender.com';
-  const proxy=base+'/proxy?key=setaflix2026&url=';
+  const key=localStorage.getItem('sf_proxy_key')||'';
+  const proxy=base+'/proxy?key='+encodeURIComponent(key)+'&url=';
   const finalUrl=(direct||audioUrl.includes('trycloudflare.com')||audioUrl.includes('onrender.com'))?audioUrl:proxy+encodeURIComponent(audioUrl);
   const ah=new Hls({maxBufferLength:30,enableWorker:true});
   ah.loadSource(finalUrl);ah.attachMedia(audio);
@@ -79,7 +80,8 @@ function loadVideoUrl(raw,mode,broadcast){
       const hls=new Hls({maxBufferLength:30,maxMaxBufferLength:60,enableWorker:true,lowLatencyMode:false});
       const cp=S.pendingCookies?'&cookies='+encodeURIComponent(S.pendingCookies):'';S.pendingCookies=null;
       const base=localStorage.getItem('sf_proxy_base')||'https://setaflix-proxy.onrender.com';
-      const proxy=base+'/proxy?key=setaflix2026'+cp+'&url=';
+      const key=localStorage.getItem('sf_proxy_key')||'';
+      const proxy=base+'/proxy?key='+encodeURIComponent(key)+cp+'&url=';
       const finalUrl=(raw.includes('trycloudflare.com')||raw.includes('onrender.com')||isDir)?raw:proxy+encodeURIComponent(raw);
       S._directLoad=false;
       hls.loadSource(finalUrl);hls.attachMedia(video);
