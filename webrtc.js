@@ -3,7 +3,9 @@ const ICE_CFG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80',              username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443',             username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
   ]
 };
 
@@ -174,6 +176,8 @@ function _showWebRTCRemote(stream, hostName) {
 
 function _hideWebRTC() {
   _stopBuffer();
+  const _pw = document.getElementById('prog-wrap');
+  if (_pw && _pw._bufCleanup) _pw._bufCleanup();
   _unlockPlayer();
   _liveStream = null;
   _isViewerLive = true;
@@ -320,10 +324,39 @@ function rewindWebRTC(secs) {
     vid.addEventListener('seeked', onFirstSeek);
   });
 
-  // Player kontrollerini buffer modu için aç
+  // Player kontrollerini buffer modu için aç (canControl bypass)
   document.getElementById('btn-pp').style.display = '';
   document.getElementById('btn-fwd10').style.display = '';
-  document.getElementById('btn-back10').onclick = () => pSeek(-10);
+  document.getElementById('btn-pp').onclick = () => {
+    if (vid.paused) vid.play().catch(() => {}); else vid.pause();
+  };
+  document.getElementById('btn-fwd10').onclick = () => {
+    vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 10);
+  };
+  document.getElementById('btn-back10').onclick = () => {
+    vid.currentTime = Math.max(0, vid.currentTime - 10);
+  };
+
+  // Seekbar (pBind yok buffer modda → elle ekle)
+  const _pw = document.getElementById('prog-wrap');
+  if (_pw._bufCleanup) _pw._bufCleanup();
+  const _onMd = e => {
+    e.stopPropagation();
+    const r = _pw.getBoundingClientRect();
+    vid.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * vid.duration;
+  };
+  const _onTs = e => {
+    e.stopPropagation(); e.preventDefault();
+    const r = _pw.getBoundingClientRect();
+    vid.currentTime = Math.max(0, Math.min(1, (e.touches[0].clientX - r.left) / r.width)) * vid.duration;
+  };
+  _pw.addEventListener('mousedown', _onMd);
+  _pw.addEventListener('touchstart', _onTs, {passive: false});
+  _pw._bufCleanup = () => {
+    _pw.removeEventListener('mousedown', _onMd);
+    _pw.removeEventListener('touchstart', _onTs);
+    _pw._bufCleanup = null;
+  };
 
   // Minimal RAF time update (pBind yerine — sync göndermeden)
   if (_raf) cancelAnimationFrame(_raf);
@@ -347,6 +380,8 @@ function goLiveWebRTC() {
   if (!_liveStream) return;
   _isViewerLive = true;
   if (_rewindUrl) { URL.revokeObjectURL(_rewindUrl); _rewindUrl = null; }
+  const _pw = document.getElementById('prog-wrap');
+  if (_pw && _pw._bufCleanup) _pw._bufCleanup();
 
   const vcont = document.getElementById('vcont');
   vcont.innerHTML = '';
