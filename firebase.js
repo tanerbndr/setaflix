@@ -71,6 +71,10 @@ function fbJoin(){
     floatReact(d.emoji);
   });
 
+  ref.child('webrtc/active').on('value',snap=>{
+    if(typeof onWebRTCActive==='function')onWebRTCActive(snap.val());
+  });
+
   ref.child('hostctrl').on('value',snap=>{
     const d=snap.val();
     if(!d)return;

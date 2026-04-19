@@ -119,10 +119,15 @@
 <div class="srctabs">
 <button class="stab on" id="t-yt" onclick="srcMode('youtube')">YouTube</button>
 <button class="stab" id="t-url" onclick="srcMode('url')">URL / m3u8</button>
+<button class="stab" id="t-wrtc" onclick="srcMode('webrtc')">📺 Ekran Paylaş</button>
 </div>
-<div class="vinrow">
+<div class="vinrow" id="vinrow">
 <input id="vurl" placeholder="YouTube linki veya video URL'si...">
 <button class="bsm" onclick="loadVideo()">Yükle</button>
+</div>
+<div id="p-webrtc" class="wrtc-panel" style="display:none">
+<button id="btn-webrtc-share" class="btn-webrtc" onclick="startScreenShare()">📺 Ekran Paylaşımı Başlat</button>
+<p class="wrtc-hint">Tarayıcı sekmesi, pencere veya tüm ekranı paylaşabilirsin</p>
 </div>
 <button class="bsm ol" onclick="syncNow()">⟳ Sync</button>
 </div>
@@ -165,5 +170,6 @@
 <script src="firebase.js"></script>
 <script src="player.js"></script>
 <script src="chat.js"></script>
+<script src="webrtc.js"></script>
 </body>
 </html>

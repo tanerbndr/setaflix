@@ -3,7 +3,10 @@ function srcMode(m){
   S.mode=m;
   document.getElementById('t-yt').classList.toggle('on',m==='youtube');
   document.getElementById('t-url').classList.toggle('on',m==='url');
+  document.getElementById('t-wrtc').classList.toggle('on',m==='webrtc');
   document.getElementById('vurl').placeholder=m==='youtube'?'YouTube linki veya video ID...':'m3u8 veya mp4 linki yapıştır...';
+  document.getElementById('vinrow').style.display=m==='webrtc'?'none':'flex';
+  document.getElementById('p-webrtc').style.display=m==='webrtc'?'flex':'none';
 }
 function loadVideo(){
   const raw=v('vurl');

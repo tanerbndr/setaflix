@@ -141,6 +141,7 @@ function showSyncBar(txt){
 // ── ODA KONTROL ──
 function leaveRoom(){
   destroyHls();
+  if(typeof cleanupWebRTC==='function')cleanupWebRTC();
   if(S.fbReady&&S.db)S.db.ref('rooms/'+S.room+'/members/'+S.myId).remove();
   hide('room');show('lobby');
   document.getElementById('vcont').innerHTML='<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>';
