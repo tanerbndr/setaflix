@@ -304,16 +304,38 @@ function rewindWebRTC(secs) {
   vcont.appendChild(vid);
 
   vid.addEventListener('loadedmetadata', () => {
-    vid.currentTime = Math.max(0, vid.duration - secs);
-    vid.play().catch(() => {});
-    document.getElementById('time-txt').textContent = '';
+    const target = Math.max(0, vid.duration - secs);
+    // İki adımlı seek: önce pos=0 (garantili keyframe), sonra hedef
+    vid.currentTime = 0;
+    const onFirstSeek = () => {
+      vid.removeEventListener('seeked', onFirstSeek);
+      if (target > 0.5) {
+        if (vid.fastSeek) vid.fastSeek(target);
+        else vid.currentTime = target;
+      }
+      vid.play().catch(() => {});
+      document.getElementById('time-txt').textContent = '';
+    };
+    vid.addEventListener('seeked', onFirstSeek);
   });
 
   // Player kontrollerini buffer modu için aç
   document.getElementById('btn-pp').style.display = '';
   document.getElementById('btn-fwd10').style.display = '';
   document.getElementById('btn-back10').onclick = () => pSeek(-10);
-  pBind(vid);
+
+  // Minimal RAF time update (pBind yerine — sync göndermeden)
+  if (_raf) cancelAnimationFrame(_raf);
+  function _bufRaf() { pUpdateTime(vid); _raf = requestAnimationFrame(_bufRaf); }
+  _raf = requestAnimationFrame(_bufRaf);
+  vid.addEventListener('play', () => {
+    document.getElementById('ico-play').style.display = 'none';
+    document.getElementById('ico-pause').style.display = '';
+  });
+  vid.addEventListener('pause', () => {
+    document.getElementById('ico-play').style.display = '';
+    document.getElementById('ico-pause').style.display = 'none';
+  });
 
   _showGoLiveBtn();
   document.getElementById('webrtc-badge').innerHTML =

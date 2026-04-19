@@ -321,8 +321,8 @@ function pFullscreen(){
   const vid=document.querySelector('#vcont video');
   const isFs=document.fullscreenElement||document.webkitFullscreenElement;
   if(!isFs){
-    // iOS Safari: sadece video elementi fullscreen destekler
-    if(vid&&vid.webkitEnterFullscreen){
+    const isLiveStream=vid&&!!vid.srcObject;
+    if(isLiveStream&&vid.webkitEnterFullscreen){
       vid.webkitEnterFullscreen();
     } else {
       const fn=vw.requestFullscreen||vw.webkitRequestFullscreen;
@@ -335,11 +335,11 @@ function pFullscreen(){
     screen.orientation?.unlock?.();
   }
 }
-document.addEventListener('fullscreenchange',()=>{
-  if(!document.fullscreenElement&&!document.webkitFullscreenElement)
-    document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
-});
-document.addEventListener('webkitfullscreenchange',()=>{
-  if(!document.webkitFullscreenElement)
-    document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>{
+  document.addEventListener(ev,()=>{
+    const isFs=document.fullscreenElement||document.webkitFullscreenElement;
+    const player=document.getElementById('player');
+    if(isFs&&player.classList.contains('wrtc-mode'))player.classList.add('visible');
+    if(!isFs)document.getElementById('ico-fs').setAttribute('d','M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z');
+  });
 });
