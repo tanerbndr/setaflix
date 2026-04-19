@@ -164,11 +164,12 @@ function _showWebRTCRemote(stream, hostName) {
   const vcont = document.getElementById('vcont');
   vcont.innerHTML = '';
   const vid = document.createElement('video');
-  vid.autoplay = true; vid.playsInline = true; vid.muted = false;
+  vid.autoplay = true; vid.playsInline = true; vid.muted = true;
   vid.srcObject = stream;
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
   vid.play().catch(() => {});
+  _showUnmuteBtn(vid);
   document.getElementById('player').style.display = '';
   _setBottomBars(false);
   _lockPlayerForViewer();
@@ -400,10 +401,12 @@ function goLiveWebRTC() {
   const vcont = document.getElementById('vcont');
   vcont.innerHTML = '';
   const vid = document.createElement('video');
-  vid.autoplay = true; vid.playsInline = true; vid.muted = false;
+  vid.autoplay = true; vid.playsInline = true; vid.muted = true;
   vid.srcObject = _liveStream;
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
+  vid.play().catch(() => {});
+  _showUnmuteBtn(vid);
 
   // Player'ı tekrar viewer canlı moduna al
   document.getElementById('btn-pp').style.display = '';
@@ -442,6 +445,23 @@ function _showGoLiveBtn() {
 function _hideGoLiveBtn() {
   const btn = document.getElementById('webrtc-golive');
   if (btn) btn.remove();
+}
+
+// ── UNMUTE OVERLAY ──
+
+function _showUnmuteBtn(vid) {
+  const existing = document.getElementById('webrtc-unmute');
+  if (existing) existing.remove();
+  const btn = document.createElement('button');
+  btn.id = 'webrtc-unmute';
+  btn.className = 'webrtc-unmute';
+  btn.innerHTML = '🔇 Sesi Aç';
+  btn.onclick = () => {
+    vid.muted = false;
+    vid.volume = 1;
+    btn.remove();
+  };
+  document.getElementById('vwrap').appendChild(btn);
 }
 
 // ── BADGE ──

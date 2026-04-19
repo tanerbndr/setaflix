@@ -829,6 +829,15 @@ body::before{
 }
 .webrtc-badge.sharing{background:rgba(230,57,70,0.85);color:#fff;border:1px solid rgba(255,143,163,0.5);}
 .webrtc-badge.viewing{background:rgba(10,10,14,0.8);color:var(--txt);border:1px solid rgba(255,255,255,0.12);}
+.webrtc-unmute{
+  position:absolute;bottom:72px;left:50%;transform:translateX(-50%);
+  background:rgba(230,57,70,0.92);color:#fff;border:none;border-radius:24px;
+  padding:0.7rem 1.8rem;font-size:1rem;font-weight:700;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:0.08em;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);z-index:30;
+  animation:pulse-btn 1.5s ease-in-out infinite;
+}
+@keyframes pulse-btn{0%,100%{box-shadow:0 4px 20px rgba(230,57,70,0.4);}50%{box-shadow:0 4px 30px rgba(230,57,70,0.8);}}
 .wrtc-panel{flex-direction:column;align-items:stretch;gap:0.6rem;padding:0.35rem 0;}
 .btn-webrtc{
   padding:0.7rem 1.1rem;
