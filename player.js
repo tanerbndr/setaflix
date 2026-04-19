@@ -285,6 +285,15 @@ function pProgSeekTouch(e,video,pw){
 function pPlay(){
   if(!canControl()){toast('Host kontrolü aktif');return;}
   const v=document.querySelector('#vcont video');if(!v)return;
+  const cf=document.getElementById('cf-icon');
+  function cfFlash(icon){
+    if(!cf)return;
+    cf.textContent=icon;
+    cf.className='cf-icon show';
+    clearTimeout(cf._t);
+    cf._t=setTimeout(()=>{cf.classList.replace('show','fade');setTimeout(()=>{cf.className='cf-icon';},350);},600);
+  }
+  pShow();
   if(v.paused){
     if(S.hls){
       const lvl=S.hls.levels&&S.hls.levels[S.hls.currentLevel];
@@ -292,8 +301,10 @@ function pPlay(){
         v.currentTime=S.hls.liveSyncPosition;
     }
     v.play().catch(()=>{});
+    cfFlash('▶');
   } else {
     v.pause();
+    cfFlash('⏸');
   }
 }
 function pSeek(s){

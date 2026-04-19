@@ -506,6 +506,15 @@ body::before{
 .sflash.right{right:0;background:radial-gradient(ellipse at right,rgba(255,255,255,0.12),transparent 70%);}
 .sflash.show{opacity:1;}
 
+.cf-icon{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);
+  width:76px;height:76px;background:rgba(0,0,0,0.55);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;pointer-events:none;z-index:20;
+  opacity:0;transition:transform 0.12s ease,opacity 0.12s ease;
+}
+.cf-icon.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.cf-icon.fade{transform:translate(-50%,-50%) scale(1.25);opacity:0;transition:transform 0.35s ease,opacity 0.35s ease;}
 
 /* ── VIDEO CONTROLS AREA ── */
 .vctl{

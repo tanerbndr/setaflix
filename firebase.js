@@ -84,6 +84,7 @@ function fbJoin(){
   });
 
   ref.child('state').once('value',snap=>{
+    if(S._hasAutoload)return;
     const d=snap.val();
     if(!d||!d.url)return;
     if(d.audioUrl)S._audioUrl=d.audioUrl;

@@ -2,7 +2,7 @@
 const S={
   user:'',room:'',isHost:false,mode:'youtube',members:{},fbReady:false,
   myId:'u_'+Math.random().toString(36).substr(2,8),
-  db:null,hls:null,pendingCookies:null,_autoloadPending:null,
+  db:null,hls:null,pendingCookies:null,_autoloadPending:null,_hasAutoload:false,
   _directLoad:false,_audioUrl:null,_subtitleUrl:null,
   _audioHls:null,_audioEl:null,_audioSync:null,_hasExtAudio:false,
   hostCtrlLocked:false,
@@ -25,9 +25,13 @@ function checkAutoload(){
   if(p.get('proxyBase'))localStorage.setItem('sf_proxy_base',decodeURIComponent(p.get('proxyBase')));
   if(p.get('proxyKey'))localStorage.setItem('sf_proxy_key',decodeURIComponent(p.get('proxyKey')));
   window.history.replaceState({},'',window.location.pathname);
-  const doLoad=()=>{document.getElementById('vurl').value=decodeURIComponent(al);srcMode('url');loadVideo();};
+  const doLoad=()=>{S._hasAutoload=false;document.getElementById('vurl').value=decodeURIComponent(al);srcMode('url');loadVideo();};
   if(document.getElementById('room').classList.contains('on'))doLoad();
-  else S._autoloadPending=doLoad;
+  else{
+    S._autoloadPending=doLoad;S._hasAutoload=true;
+    document.getElementById('cn').value=localStorage.getItem('sf_last_name')||'Taner';
+    createRoom();
+  }
 }
 window.addEventListener('load',checkAutoload);
 
@@ -57,6 +61,8 @@ function joinRoom(){
   toast('Odaya katıldın!');
 }
 function enterRoom(){
+  localStorage.setItem('sf_last_room',S.room);
+  localStorage.setItem('sf_last_name',S.user);
   show('room');hide('lobby');
   document.getElementById('dcode').textContent=S.room;
   addMember(S.myId,S.user,S.isHost);
