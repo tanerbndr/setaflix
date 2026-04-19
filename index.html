@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="noir">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0d0d14">
+<meta name="theme-color" content="#06060A">
 <title>SeTaFlix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Karla:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -16,9 +16,16 @@
 </head>
 <body>
 
+<div class="ambient-bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Firebase Modal -->
 <div class="modal-bg hidden" id="fb-modal">
 <div class="modal">
-<h2>🔥 Firebase Kurulumu</h2>
+<h2>Firebase Kurulumu</h2>
 <p>Gerçek zamanlı senkronizasyon için Firebase config bilgilerini gir.</p>
 <div class="step"><div class="snum">1</div><div class="stxt"><a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> → <strong>Proje oluştur</strong></div></div>
 <div class="step"><div class="snum">2</div><div class="stxt">Sol menü → <strong>Build → Realtime Database → Create database → Test mode</strong></div></div>
@@ -34,132 +41,210 @@
 </div>
 </div>
 
+<!-- LOBBY -->
 <div id="lobby" class="scr on">
-<div class="logo">SeTaFlix</div>
-<div class="sub">Arkadaşınla aynı anda, senkronize izle</div>
-<div class="card">
-<div class="tabs">
-<button class="tab on" onclick="ltab('create')">Oda Oluştur</button>
-<button class="tab" onclick="ltab('join')">Katıl</button>
-</div>
-<div id="p-create" class="panel on">
-<label class="lbl">Kullanıcı Adın</label><input class="inp" id="cn" placeholder="Sena veya Taner..." maxlength="20">
-<label class="lbl">Oda Adı (opsiyonel)</label><input class="inp" id="rn" placeholder="Film gecesi 🎬" maxlength="30">
-<button class="btn" onclick="createRoom()">Oda Oluştur →</button>
-</div>
-<div id="p-join" class="panel">
-<label class="lbl">Kullanıcı Adın</label><input class="inp" id="jn" placeholder="Sena veya Taner..." maxlength="20">
-<label class="lbl">Oda Kodu</label><input class="inp" id="rc" placeholder="örn. ABC123" maxlength="8" style="text-transform:uppercase;letter-spacing:0.1em">
-<button class="btn" onclick="joinRoom()">Odaya Katıl →</button>
-</div>
-</div>
-<div class="feats">
-<div class="feat"><div class="fdot"></div>YouTube</div>
-<div class="feat"><div class="fdot"></div>m3u8 / MP4</div>
-<div class="feat"><div class="fdot"></div>Gerçek zamanlı sync</div>
-<div class="feat"><div class="fdot"></div>Sohbet</div>
-<div class="feat"><div class="fdot"></div>Telefon uyumlu</div>
-</div>
-<button style="margin-top:1.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="document.getElementById('fb-modal').classList.remove('hidden')">⚙️ Firebase Ayarları</button>
-<button style="margin-top:0.5rem;background:transparent;border:1px solid var(--brd);color:var(--txt2);padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:'DM Sans',sans-serif;" onclick="setProxyBase()">🔧 Proxy URL</button>
-</div>
+  <div class="logo">SeTaFlix</div>
+  <div class="sub">Arkadaşınla aynı anda, senkronize izle</div>
 
-<div id="room" class="scr">
-<div class="rhead">
-<div class="rlogo">SeTaFlix</div>
-<div class="rid" onclick="copyCode()"><span style="color:var(--txt3);font-size:0.72rem;">ODA</span><strong id="dcode">------</strong><span>⎘</span></div>
-<div class="vcnt"><div class="ldot"></div><span id="vcnt-txt">1</span></div>
-<button class="bhost" id="btn-hostctrl" style="display:none" onclick="toggleHostControl()">🔓 Serbest</button>
-<button class="bleave" onclick="leaveRoom()">Çık</button>
-</div>
-<div class="rbody">
-<div class="varea">
-<div class="vwrap" id="vwrap">
-<div id="vcont">
-<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>
-</div>
-
-<div id="player">
-  <div class="prog-wrap" id="prog-wrap">
-    <div class="prog-buf" id="prog-buf"></div>
-    <div class="prog-fill" id="prog-fill"></div>
-  </div>
-  <div class="ctrl-row">
-    <button class="cbtn" id="btn-pp" onclick="pPlay()">
-    <svg id="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    <svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-    </button>
-    <button class="cbtn" id="btn-back10" onclick="pSeek(-10)" title="-10s">
-      <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
-    </button>
-    <button class="cbtn" id="btn-fwd10" onclick="pSeek(10)" title="+10s">
-      <svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
-    </button>
-    <div class="vol-row">
-      <button class="cbtn" onclick="pMute()">
-        <svg id="ico-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-      </button>
-      <input class="vol-sl" id="vol-sl" type="range" min="0" max="1" step="0.05" value="1" oninput="pVol(this.value)">
+  <div class="card" id="lobby-card">
+    <div class="tabs">
+      <button class="tab on" onclick="ltab('create')">Oda Oluştur</button>
+      <button class="tab" onclick="ltab('join')">Katıl</button>
     </div>
-    <span class="time-txt" id="time-txt">0:00 / 0:00</span>
-    <div class="cspacer"></div>
-    <button class="spd-btn" id="spd-btn" onclick="pSpeed()">1×</button>
-    <button class="cbtn" onclick="pFullscreen()">
-      <svg id="ico-fs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-    </button>
+    <div id="p-create" class="panel on">
+      <label class="lbl">Kullanıcı Adın</label>
+      <input class="inp" id="cn" placeholder="Sena veya Taner..." maxlength="20">
+      <label class="lbl">Oda Adı (opsiyonel)</label>
+      <input class="inp" id="rn" placeholder="Film gecesi 🎬" maxlength="30">
+      <button class="btn" onclick="createRoom()">Oda Oluştur</button>
+    </div>
+    <div id="p-join" class="panel">
+      <label class="lbl">Kullanıcı Adın</label>
+      <input class="inp" id="jn" placeholder="Sena veya Taner..." maxlength="20">
+      <label class="lbl">Oda Kodu</label>
+      <input class="inp" id="rc" placeholder="örn. ABC123" maxlength="8" style="text-transform:uppercase;letter-spacing:0.1em">
+      <button class="btn" onclick="joinRoom()">Odaya Katıl</button>
+    </div>
+  </div>
+
+  <div class="feats">
+    <div class="feat"><div class="fdot"></div>YouTube</div>
+    <div class="feat"><div class="fdot"></div>m3u8 / MP4</div>
+    <div class="feat"><div class="fdot"></div>Gerçek zamanlı sync</div>
+    <div class="feat"><div class="fdot"></div>Sohbet</div>
+    <div class="feat"><div class="fdot"></div>Telefon uyumlu</div>
+    <div class="feat"><div class="fdot"></div>Ekran paylaşımı</div>
+  </div>
+
+  <!-- Theme Selector -->
+  <div class="theme-row">
+    <button class="theme-dot active" data-t="noir" title="Noir Cinéma" onclick="setTheme('noir')"></button>
+    <button class="theme-dot" data-t="ocean" title="Deep Ocean" onclick="setTheme('ocean')"></button>
+    <button class="theme-dot" data-t="neon" title="Neon Tokyo" onclick="setTheme('neon')"></button>
+    <button class="theme-dot" data-t="pastel" title="Pastel Dream" onclick="setTheme('pastel')"></button>
+  </div>
+
+  <div class="lobby-btns">
+    <button class="butil" onclick="document.getElementById('fb-modal').classList.remove('hidden')">⚙️ Firebase</button>
+    <button class="butil" onclick="setProxyBase()">🔧 Proxy URL</button>
   </div>
 </div>
 
-<div class="sflash left" id="sf-left"><span id="sf-left-txt">◀◀ 10s</span></div>
-<div class="sflash right" id="sf-right"><span id="sf-right-txt">10s ▶▶</span></div>
-</div>
+<!-- ROOM -->
+<div id="room" class="scr">
+  <div class="rhead">
+    <div class="rlogo">SeTaFlix</div>
+    <div class="rid" onclick="copyCode()">
+      <span style="color:var(--txt3);font-size:0.68rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;">ODA</span>
+      <strong id="dcode">------</strong>
+      <span>⎘</span>
+    </div>
+    <div class="vcnt-wrap"><div class="ldot"></div><span id="vcnt-txt">1</span></div>
+    <button class="bhost" id="btn-hostctrl" style="display:none" onclick="toggleHostControl()">🔓 Serbest</button>
+    <button class="btn-draw-allow" id="btn-draw-allow" onclick="toggleDrawAllow()">✏️ Çizim Kapat</button>
+    <!-- Theme toggle in room -->
+    <div style="position:relative;">
+      <button class="rtheme-btn" id="rtheme-btn" onclick="toggleThemePanel()" title="Tema">🎨</button>
+      <div class="theme-panel hidden" id="room-theme-panel">
+        <button class="theme-dot" data-t="noir" title="Noir" onclick="setTheme('noir');toggleThemePanel()"></button>
+        <button class="theme-dot" data-t="ocean" title="Ocean" onclick="setTheme('ocean');toggleThemePanel()"></button>
+        <button class="theme-dot" data-t="neon" title="Neon" onclick="setTheme('neon');toggleThemePanel()"></button>
+        <button class="theme-dot" data-t="pastel" title="Pastel" onclick="setTheme('pastel');toggleThemePanel()"></button>
+      </div>
+    </div>
+    <button class="bleave" onclick="leaveRoom()">Çık</button>
+  </div>
 
-<div class="syncbar hidden" id="syncbar"><div class="sync-dot"></div><span id="sync-txt">Sync aktif</span></div>
-<div class="vctl">
-<div class="srctabs">
-<button class="stab on" id="t-yt" onclick="srcMode('youtube')">YouTube</button>
-<button class="stab" id="t-url" onclick="srcMode('url')">URL / m3u8</button>
-<button class="stab" id="t-wrtc" onclick="srcMode('webrtc')">📺 Ekran Paylaş</button>
-</div>
-<div class="vinrow" id="vinrow">
-<input id="vurl" placeholder="YouTube linki veya video URL'si...">
-<button class="bsm" onclick="loadVideo()">Yükle</button>
-</div>
-<div id="p-webrtc" class="wrtc-panel" style="display:none">
-<button id="btn-webrtc-share" class="btn-webrtc" onclick="startScreenShare()">📺 Ekran Paylaşımı Başlat</button>
-<p class="wrtc-hint">Tarayıcı sekmesi, pencere veya tüm ekranı paylaşabilirsin</p>
-</div>
-<button class="bsm ol" onclick="syncNow()">⟳ Sync</button>
-</div>
-<div class="subbar">
-<span class="sub-label">💬 Altyazı:</span>
-<input id="suburl" placeholder="Altyazı linki (.vtt)">
-<button class="bsm" onclick="loadSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Ekle</button>
-<button class="bsm ol" onclick="removeSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.65rem;">Kaldır</button>
-<span class="sub-active" id="sub-status"></span>
-</div>
-</div>
+  <div class="rbody">
+    <!-- Video Area -->
+    <div class="varea">
+      <div class="vwrap" id="vwrap">
+        <div id="vcont">
+          <div class="vph" id="vph">
+            <div class="vph-icon">▶</div>
+            <p>Video bekleniyor</p>
+            <small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small>
+          </div>
+        </div>
 
-<div class="sidebar" id="sidebar">
-<div class="stabs">
-<button class="stab2 on" id="st-chat" onclick="swtab('chat')">Sohbet</button>
-<button class="stab2" id="st-mem" onclick="swtab('members')">Üyeler</button>
-</div>
-<div class="spanel on" id="sp-chat">
-<div class="msgs" id="msgs"></div>
-<div class="reacts">
-<button class="rb" onclick="react('😂')">😂</button><button class="rb" onclick="react('😮')">😮</button>
-<button class="rb" onclick="react('❤️')">❤️</button><button class="rb" onclick="react('👏')">👏</button>
-<button class="rb" onclick="react('🔥')">🔥</button><button class="rb" onclick="react('😱')">😱</button>
-</div>
-<div class="cinput">
-<input id="ci" placeholder="Mesaj yaz..." maxlength="200" onkeydown="if(event.key==='Enter')sendMsg()">
-<button class="bsend" onclick="sendMsg()">↑</button>
-</div>
-</div>
-<div class="spanel" id="sp-mem"><div class="mlist" id="mlist"></div></div>
-</div>
-</div>
+        <!-- Draw Canvas -->
+        <canvas id="draw-canvas"></canvas>
+
+        <!-- Draw Pencil Toggle -->
+        <button class="draw-toggle" id="draw-toggle" onclick="toggleDraw()" title="Çizim Aracı">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+
+        <!-- Draw Toolbar -->
+        <div class="draw-toolbar" id="draw-toolbar">
+          <button class="draw-swatch active" data-color="#FFFFFF" style="background:#fff" onclick="setDrawColor('#FFFFFF',this)" title="Beyaz"></button>
+          <button class="draw-swatch" data-color="#E63946" style="background:#E63946" onclick="setDrawColor('#E63946',this)" title="Kırmızı"></button>
+          <button class="draw-swatch" data-color="#F4D35E" style="background:#F4D35E" onclick="setDrawColor('#F4D35E',this)" title="Sarı"></button>
+          <button class="draw-swatch" data-color="#06D6A0" style="background:#06D6A0" onclick="setDrawColor('#06D6A0',this)" title="Yeşil"></button>
+          <button class="draw-swatch" data-color="#00B4D8" style="background:#00B4D8" onclick="setDrawColor('#00B4D8',this)" title="Mavi"></button>
+          <div class="draw-divider"></div>
+          <button class="draw-tool-btn" id="draw-size-btn" onclick="cycleDrawSize()" title="Kalınlık">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+          </button>
+          <button class="draw-tool-btn" id="draw-eraser-btn" onclick="toggleEraser()" title="Silgi">
+            <svg viewBox="0 0 24 24"><path d="M15.14 3L3 15.14 8.86 21H21V18.97L15.14 3zm-4.31 13.38L7.2 12.76l7.07-7.07 3.62 3.62-7.06 7.07z"/></svg>
+          </button>
+          <button class="draw-tool-btn" onclick="clearDraw()" title="Temizle">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+        </div>
+
+        <!-- Player -->
+        <div id="player">
+          <div class="prog-wrap" id="prog-wrap">
+            <div class="prog-buf" id="prog-buf"></div>
+            <div class="prog-fill" id="prog-fill"></div>
+          </div>
+          <div class="ctrl-row">
+            <button class="cbtn" id="btn-pp" onclick="pPlay()">
+              <svg id="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="ico-pause" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="cbtn" id="btn-back10" onclick="pSeek(-10)" title="-10s">
+              <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
+            </button>
+            <button class="cbtn" id="btn-fwd10" onclick="pSeek(10)" title="+10s">
+              <svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/><text x="7.5" y="16" font-size="5.5" fill="white" font-family="sans-serif" font-weight="bold">10</text></svg>
+            </button>
+            <div class="vol-row">
+              <button class="cbtn" onclick="pMute()">
+                <svg id="ico-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              </button>
+              <input class="vol-sl" id="vol-sl" type="range" min="0" max="1" step="0.05" value="1" oninput="pVol(this.value)">
+            </div>
+            <span class="time-txt" id="time-txt">0:00 / 0:00</span>
+            <div class="cspacer"></div>
+            <button class="spd-btn" id="spd-btn" onclick="pSpeed()">1×</button>
+            <button class="cbtn" onclick="pFullscreen()">
+              <svg id="ico-fs" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="sflash left" id="sf-left"><span id="sf-left-txt">◀◀ 10s</span></div>
+        <div class="sflash right" id="sf-right"><span id="sf-right-txt">10s ▶▶</span></div>
+      </div>
+
+      <div class="syncbar hidden" id="syncbar"><div class="sync-dot"></div><span id="sync-txt">Sync aktif</span></div>
+
+      <div class="vctl">
+        <div class="srctabs">
+          <button class="stab on" id="t-yt" onclick="srcMode('youtube')">YouTube</button>
+          <button class="stab" id="t-url" onclick="srcMode('url')">URL / m3u8</button>
+          <button class="stab" id="t-wrtc" onclick="srcMode('webrtc')">📺 Ekran</button>
+        </div>
+        <div class="vinrow" id="vinrow">
+          <input id="vurl" placeholder="YouTube linki veya video URL'si...">
+          <button class="bsm" onclick="loadVideo()">Yükle</button>
+        </div>
+        <div id="p-webrtc" class="wrtc-panel" style="display:none">
+          <button id="btn-webrtc-share" class="btn-webrtc" onclick="startScreenShare()">📺 Ekran Paylaşımı Başlat</button>
+          <p class="wrtc-hint">Tarayıcı sekmesi, pencere veya tüm ekranı paylaşabilirsin</p>
+        </div>
+        <button class="bsm ol" onclick="syncNow()">⟳ Sync</button>
+      </div>
+
+      <div class="subbar">
+        <span class="sub-label">Altyazı</span>
+        <input id="suburl" placeholder="Altyazı linki (.vtt)">
+        <button class="bsm" onclick="loadSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.6rem;">Ekle</button>
+        <button class="bsm ol" onclick="removeSubtitle()" style="font-size:0.72rem;padding:0.38rem 0.6rem;">Kaldır</button>
+        <span class="sub-active" id="sub-status"></span>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="stabs">
+        <button class="stab2 on" id="st-chat" onclick="swtab('chat')">Sohbet</button>
+        <button class="stab2" id="st-mem" onclick="swtab('members')">Üyeler</button>
+      </div>
+
+      <div class="spanel on" id="sp-chat">
+        <div class="msgs" id="msgs"></div>
+        <div class="reacts">
+          <button class="rb" onclick="react('👋')">👋</button>
+          <button class="rb" onclick="react('😂')">😂</button>
+          <button class="rb" onclick="react('😮')">😮</button>
+          <button class="rb" onclick="react('❤️')">❤️</button>
+          <button class="rb" onclick="react('👏')">👏</button>
+          <button class="rb" onclick="react('🔥')">🔥</button>
+          <button class="rb" onclick="react('😱')">😱</button>
+        </div>
+        <div class="cinput">
+          <input id="ci" placeholder="Mesaj yaz..." maxlength="200" onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="bsend" onclick="sendMsg()">↑</button>
+        </div>
+      </div>
+
+      <div class="spanel" id="sp-mem"><div class="mlist" id="mlist"></div></div>
+    </div>
+  </div>
 </div>
 
 <button class="mob-stoggle" id="mob-tog" style="display:none" onclick="toggleMobSidebar()">💬</button>
@@ -171,5 +256,42 @@
 <script src="player.js"></script>
 <script src="chat.js"></script>
 <script src="webrtc.js"></script>
+<script src="draw.js"></script>
+
+<script>
+/* ── THEME SYSTEM ── */
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('sf_theme',t);
+  document.querySelectorAll('.theme-dot').forEach(d=>{
+    d.classList.toggle('active',d.dataset.t===t);
+  });
+}
+(function(){
+  const saved=localStorage.getItem('sf_theme')||'noir';
+  setTheme(saved);
+})();
+
+function toggleThemePanel(){
+  document.getElementById('room-theme-panel').classList.toggle('hidden');
+}
+
+/* 3D card tilt */
+(function(){
+  const card=document.getElementById('lobby-card');
+  if(!card)return;
+  const mq=window.matchMedia('(hover: hover)');
+  if(!mq.matches)return;
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width-0.5)*12;
+    const y=-((e.clientY-r.top)/r.height-0.5)*10;
+    card.style.transform=`perspective(800px) rotateX(${y}deg) rotateY(${x}deg) translateZ(4px)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='perspective(800px) rotateX(0) rotateY(0) translateZ(0)';
+  });
+})();
+</script>
 </body>
 </html>

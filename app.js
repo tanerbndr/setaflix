@@ -7,7 +7,8 @@ const S={
   _audioHls:null,_audioEl:null,_audioSync:null,_hasExtAudio:false,
   hostCtrlLocked:false,
   allowedIds:{},
-  _reconnectTimer:null,_pendingSeek:null
+  _reconnectTimer:null,_pendingSeek:null,
+  drawEnabled:false,drawAllowed:false
 };
 const SPEEDS=[0.5,0.75,1,1.25,1.5,2];
 let _spdIdx=2;
@@ -60,7 +61,8 @@ function enterRoom(){
   addMember(S.myId,S.user,S.isHost);
   renderMembers();
   if(window.innerWidth<=640)document.getElementById('mob-tog').style.display='flex';
-  if(S.isHost)document.getElementById('btn-hostctrl').style.display='';
+  if(S.isHost){document.getElementById('btn-hostctrl').style.display='';document.getElementById('btn-draw-allow').style.display='';}
+
   if(S._autoloadPending){setTimeout(S._autoloadPending,400);S._autoloadPending=null;}
 }
 

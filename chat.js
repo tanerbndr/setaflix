@@ -24,14 +24,21 @@ function addMsgEl(name,text,own=false,sys=false,color=''){
 }
 
 // ── REACTIONS ──
+const EMOJI_TYPE={
+  '👋':'wave','❤️':'heart','🔥':'fire','😂':'laugh','👏':'clap',
+  '😮':'default','😱':'default'
+};
 function react(emoji){floatReact(emoji);fbReact(emoji);}
 function floatReact(emoji){
   const c=document.getElementById('frcts');
   const el=document.createElement('div');
-  el.className='fr';el.textContent=emoji;
-  el.style.left=(10+Math.random()*60)+'px';
+  const type=EMOJI_TYPE[emoji]||'default';
+  el.className='fr type-'+type;
+  el.textContent=emoji;
+  el.style.left=(8+Math.random()*55)+'px';
   c.appendChild(el);
-  setTimeout(()=>el.remove(),2100);
+  const dur=type==='wave'?2800:type==='heart'?2500:type==='fire'?2300:2500;
+  setTimeout(()=>el.remove(),dur+100);
 }
 
 // ── MEMBERS ──
