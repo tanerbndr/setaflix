@@ -39,6 +39,9 @@ async function startScreenShare() {
   }
 
   destroyHls();
+  // Eski video explicit durdur (çift ses önlemi)
+  const _ov = document.querySelector('#vcont video');
+  if (_ov) { _ov.pause(); _ov.srcObject = null; _ov.src = ''; }
   _wRef = S.db.ref('rooms/' + S.room + '/webrtc');
   await _wRef.remove();
 
@@ -214,6 +217,8 @@ function _lockPlayerForHost() {
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('spd-btn').style.display = 'none';
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
+  // Host preview muted başlıyor — vol slider ile kazara unmute olmasını engelle
+  document.querySelector('.vol-row').style.display = 'none';
 }
 
 function _lockPlayerForViewer() {
@@ -223,11 +228,18 @@ function _lockPlayerForViewer() {
   const vw = document.getElementById('vwrap');
   vw.addEventListener('mousemove', pShow);
   vw.addEventListener('touchstart', pTouchShow, {passive:true});
-  document.getElementById('btn-pp').style.display = 'none';
+  // btn-pp: canlı modda pause/play (pause → durdur, play → live devam)
+  document.getElementById('btn-pp').style.display = '';
+  document.getElementById('btn-pp').onclick = () => {
+    const v = document.querySelector('#vcont video');
+    if (!v) return;
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  };
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('spd-btn').style.display = 'none';
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
-  // -10s butonu buffer'a geri sarar
+  // -10s butonu buffer moduna geçer
   document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
 }
 
@@ -238,11 +250,13 @@ function _unlockPlayer() {
   vw.removeEventListener('mousemove', pShow);
   vw.removeEventListener('touchstart', pTouchShow);
   document.getElementById('btn-pp').style.display = '';
+  document.getElementById('btn-pp').onclick = null;
   document.getElementById('btn-back10').style.display = '';
   document.getElementById('btn-fwd10').style.display = '';
   document.getElementById('spd-btn').style.display = '';
   document.getElementById('time-txt').textContent = '0:00 / 0:00';
   document.getElementById('btn-back10').onclick = () => pSeek(-10);
+  document.querySelector('.vol-row').style.display = '';
 }
 
 function _appendVolControl(vid) {
@@ -391,8 +405,14 @@ function goLiveWebRTC() {
   vid.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
   vcont.appendChild(vid);
 
-  // Player'ı tekrar viewer moduna al
-  document.getElementById('btn-pp').style.display = 'none';
+  // Player'ı tekrar viewer canlı moduna al
+  document.getElementById('btn-pp').style.display = '';
+  document.getElementById('btn-pp').onclick = () => {
+    const v = document.querySelector('#vcont video');
+    if (!v) return;
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  };
   document.getElementById('btn-fwd10').style.display = 'none';
   document.getElementById('btn-back10').onclick = () => rewindWebRTC(10);
   document.getElementById('time-txt').innerHTML = '<span class="live-dot-txt">🔴 CANLI</span>';
