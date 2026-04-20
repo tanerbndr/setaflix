@@ -192,6 +192,35 @@ function toast(msg){
   t.textContent=msg;t.classList.add('on');
   clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),2800);
 }
+// ── PROXY WAKE ──
+function wakeProxy(){
+  const base=localStorage.getItem('sf_proxy_base')||'https://setaflix-proxy.onrender.com';
+  const el=document.getElementById('proxy-ping');
+  const dot=document.getElementById('proxy-ping-dot');
+  const txt=document.getElementById('proxy-ping-txt');
+  if(!el)return;
+  el.style.display='flex';
+  dot.className='pp-dot pulsing';
+  txt.textContent='Proxy uyandırılıyor...';
+  const t=Date.now();
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(),38000);
+  fetch(base+'/proxy?url=https://www.google.com/favicon.ico',{mode:'no-cors',signal:ctrl.signal})
+    .then(()=>{
+      clearTimeout(tid);
+      const sec=Math.round((Date.now()-t)/1000);
+      dot.className='pp-dot ready';
+      txt.textContent=sec>4?'Proxy uyandı ('+sec+'s) ✓':'Proxy hazır ✓';
+      setTimeout(()=>{el.classList.add('fade');setTimeout(()=>{el.style.display='none';},1200);},3500);
+    })
+    .catch(err=>{
+      clearTimeout(tid);
+      dot.className='pp-dot error';
+      txt.textContent=err.name==='AbortError'?'Proxy zaman aşımı (>38s)':'Proxy yanıt vermedi';
+    });
+}
+window.addEventListener('load',wakeProxy);
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     const lob=document.getElementById('lobby');

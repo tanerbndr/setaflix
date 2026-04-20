@@ -920,3 +920,24 @@ body::before{
   .vol-sl{width:55px;}
   .frcts{right:16px;}
 }
+
+/* ══════════════════════════════════════════
+   PROXY WAKE INDICATOR
+══════════════════════════════════════════ */
+.proxy-ping{
+  display:flex;align-items:center;gap:0.45rem;
+  font-size:0.7rem;color:var(--txt3);
+  margin-top:0.55rem;
+  opacity:1;transition:opacity 1.2s ease;
+  font-family:'JetBrains Mono',monospace;letter-spacing:0.02em;
+}
+.proxy-ping.fade{opacity:0;}
+.pp-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#fbbf24;flex-shrink:0;
+  transition:background 0.4s;
+}
+.pp-dot.ready{background:#22d3a0;}
+.pp-dot.error{background:#f87171;}
+.pp-dot.pulsing{animation:pp-pulse 1.1s ease-in-out infinite;}
+@keyframes pp-pulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
