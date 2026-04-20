@@ -19,14 +19,17 @@ function saveFirebase(){
   const cfg={apiKey:v('fb-apikey'),authDomain:v('fb-authdomain'),databaseURL:v('fb-dburl'),projectId:v('fb-projectid')};
   if(!cfg.apiKey||!cfg.databaseURL){toast('API Key ve Database URL zorunlu!');return;}
   localStorage.setItem('wt_fb',JSON.stringify(cfg));
-  if(initFB(cfg))document.getElementById('fb-modal').classList.add('hidden');
+  if(initFB(cfg)){document.getElementById('fb-modal').classList.add('hidden');if(S.room)fbJoin();}
 }
 function skipFirebase(){document.getElementById('fb-modal').classList.add('hidden');toast('Demo modda çalışıyor');}
 function tryInitFB(n){
-  if(typeof firebase!=='undefined'&&firebase.initializeApp)initFB(FB_CFG);
+  if(typeof firebase!=='undefined'&&firebase.initializeApp){
+    if(initFB(FB_CFG)&&S.room)fbJoin();
+  }
   else if(n>0)setTimeout(()=>tryInitFB(n-1),500);
   else toast('Firebase SDK yüklenemedi');
 }
+
 window.addEventListener('load',()=>tryInitFB(10));
 
 // ── FIREBASE ROOM ──

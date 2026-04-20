@@ -96,7 +96,7 @@ function loadVideoUrl(raw,mode,broadcast){
         if(S._subtitleUrl){document.getElementById('suburl').value=S._subtitleUrl;loadSubtitle();S._subtitleUrl=null;}
         video.play().catch(()=>{});
       });
-      let _proxyRetried=false;
+      let _proxyRetried=false,_netErrCnt=0;
       hls.on(Hls.Events.ERROR,function(e,data){
         if(data.fatal){
           if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
@@ -104,7 +104,11 @@ function loadVideoUrl(raw,mode,broadcast){
               _proxyRetried=true;isDir=false;
               hls.loadSource(proxy+encodeURIComponent(raw));
               hls.startLoad();
-            } else {toast('m3u8 ağ hatası');hls.startLoad();}
+            } else if(_netErrCnt<3){
+              _netErrCnt++;
+              toast('m3u8 ağ hatası — yeniden deneniyor ('+_netErrCnt+'/3)...');
+              setTimeout(()=>hls.startLoad(),_netErrCnt*3000);
+            } else {toast('Video yüklenemedi — proxy kontrol et');}
           }
           else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){toast('Medya hatası — kurtarılıyor...');hls.recoverMediaError();}
           else{toast('Video yüklenemedi');hls.destroy();}
