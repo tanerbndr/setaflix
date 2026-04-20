@@ -128,7 +128,7 @@ function loadVideoUrl(raw,mode,broadcast){
     }
     if(broadcast){
       fbSync({cmd:'load',url:raw,type:'url',name:S.user,audioUrl:pendAudio||null,direct:isDir});
-      fbSaveState(raw,'url',pendAudio,0,true);
+      fbSaveState(raw,'url',pendAudio,0,true,isDir);
       fbChat(S.user+' bir dizi/film başlattı.',true);
       toast('m3u8 video yüklendi!');
     }
@@ -181,7 +181,7 @@ function removeSubtitle(){
 }
 
 // ── CUSTOM PLAYER ──
-let _raf=null,_tapCnt=0,_tapSide='',_tapTimer=null,_hideTimer=null;
+let _raf=null,_tapCnt=0,_tapSide='',_tapTimer=null,_hideTimer=null,_vwCleanup=null;
 
 function pReset(){
   document.getElementById('prog-fill').style.width='0%';
@@ -195,15 +195,12 @@ function pReset(){
 }
 
 function pBind(video){
+  if(_vwCleanup){_vwCleanup();_vwCleanup=null;}
   const vw=document.getElementById('vwrap');
-  vw.addEventListener('mousemove',pShow);
-  vw.addEventListener('touchstart',pTouchShow,{passive:true});
-
   const pw=document.getElementById('prog-wrap');
-  pw.addEventListener('mousedown',e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeek(e,video,pw);});
-  pw.addEventListener('touchstart',e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeekTouch(e,video,pw);},{passive:false});
-
-  vw.addEventListener('click',e=>{
+  const onPDown=e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeek(e,video,pw);};
+  const onPTS=e=>{e.stopPropagation();if(!canControl()){toast('Host kontrolü aktif');return;}pProgSeekTouch(e,video,pw);};
+  const onClick=e=>{
     if(e.target.closest('#player'))return;
     const rect=vw.getBoundingClientRect();
     const side=(e.clientX-rect.left)<rect.width/2?'left':'right';
@@ -214,7 +211,19 @@ function pBind(video){
       else pPlay();
       _tapCnt=0;
     },250);
-  });
+  };
+  vw.addEventListener('mousemove',pShow);
+  vw.addEventListener('touchstart',pTouchShow,{passive:true});
+  pw.addEventListener('mousedown',onPDown);
+  pw.addEventListener('touchstart',onPTS,{passive:false});
+  vw.addEventListener('click',onClick);
+  _vwCleanup=()=>{
+    vw.removeEventListener('mousemove',pShow);
+    vw.removeEventListener('touchstart',pTouchShow);
+    pw.removeEventListener('mousedown',onPDown);
+    pw.removeEventListener('touchstart',onPTS);
+    vw.removeEventListener('click',onClick);
+  };
 
   function raf(){pUpdateTime(video);_raf=requestAnimationFrame(raf);}
   _raf=requestAnimationFrame(raf);

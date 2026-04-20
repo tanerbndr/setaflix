@@ -7,7 +7,7 @@ const S={
   _audioHls:null,_audioEl:null,_audioSync:null,_hasExtAudio:false,
   hostCtrlLocked:false,
   allowedIds:{},
-  _reconnectTimer:null,_pendingSeek:null
+  _reconnectTimer:null,_pendingSeek:null,_stateLoaded:false
 };
 const SPEEDS=[0.5,0.75,1,1.25,1.5,2];
 let _spdIdx=2;
@@ -110,9 +110,10 @@ function updateCtrlLock(){
 function applySyncCmd(d){
   const vid=document.querySelector('#vcont video');
   if(d.cmd==='load'){
+    if(!S._stateLoaded)return;
     if(d.audioUrl)S._audioUrl=d.audioUrl;
     if(d.subtitleUrl)S._subtitleUrl=d.subtitleUrl;
-    S._directLoad=false;
+    S._directLoad=!!d.direct;
     loadVideoUrl(d.url,d.type,false);
     showSyncBar((d.name||'Birisi')+' video yükledi');
   }
@@ -155,7 +156,7 @@ function leaveRoom(){
   hide('room');show('lobby');
   document.getElementById('vcont').innerHTML='<div class="vph" id="vph"><div class="vph-icon">▶</div><p>Video bekleniyor</p><small>Aşağıdan YouTube, m3u8 veya direkt URL ekle</small></div>';
   document.getElementById('msgs').innerHTML='';
-  S.members={};S.hostCtrlLocked=false;S.allowedIds={};
+  S.members={};S.hostCtrlLocked=false;S.allowedIds={};S._stateLoaded=false;
   document.getElementById('mob-tog').style.display='none';
   document.getElementById('sidebar').classList.remove('mob-open');
   document.getElementById('btn-hostctrl').style.display='none';
@@ -205,7 +206,8 @@ function wakeProxy(){
   const t=Date.now();
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),38000);
-  fetch(base+'/proxy?url=https://www.google.com/favicon.ico',{mode:'no-cors',signal:ctrl.signal})
+  const wkey=localStorage.getItem('sf_proxy_key')||'';
+  fetch(base+'/proxy?key='+encodeURIComponent(wkey)+'&url=https://www.google.com/favicon.ico',{mode:'no-cors',signal:ctrl.signal})
     .then(()=>{
       clearTimeout(tid);
       const sec=Math.round((Date.now()-t)/1000);

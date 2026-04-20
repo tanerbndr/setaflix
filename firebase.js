@@ -87,11 +87,12 @@ function fbJoin(){
   });
 
   ref.child('state').once('value',snap=>{
+    S._stateLoaded=true;
     if(S._hasAutoload)return;
     const d=snap.val();
     if(!d||!d.url)return;
     if(d.audioUrl)S._audioUrl=d.audioUrl;
-    S._directLoad=false;
+    S._directLoad=!!d.direct;
     S._pendingSeek={time:d.currentTime||0,playing:d.playing};
     loadVideoUrl(d.url,d.type||'url',false);
   });
@@ -132,7 +133,7 @@ function fbReact(emoji){
   if(!S.fbReady)return;
   S.db.ref('rooms/'+S.room+'/react').push({uid:S.myId,emoji,ts:Date.now()});
 }
-function fbSaveState(url,type,audioUrl,currentTime,playing){
+function fbSaveState(url,type,audioUrl,currentTime,playing,direct){
   if(!S.fbReady)return;
-  S.db.ref('rooms/'+S.room+'/state').set({url,type:type||'url',audioUrl:audioUrl||null,currentTime:currentTime||0,playing:!!playing,ts:Date.now()});
+  S.db.ref('rooms/'+S.room+'/state').set({url,type:type||'url',audioUrl:audioUrl||null,currentTime:currentTime||0,playing:!!playing,direct:!!direct,ts:Date.now()});
 }
