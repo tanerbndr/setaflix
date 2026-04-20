@@ -89,8 +89,8 @@ function fbJoin(){
     if(!d||!d.url)return;
     if(d.audioUrl)S._audioUrl=d.audioUrl;
     S._directLoad=false;
-    loadVideoUrl(d.url,d.type||'url',false);
     S._pendingSeek={time:d.currentTime||0,playing:d.playing};
+    loadVideoUrl(d.url,d.type||'url',false);
   });
 
   S.db.ref('.info/connected').on('value',snap=>{
